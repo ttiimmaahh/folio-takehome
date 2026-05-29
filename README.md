@@ -8,27 +8,32 @@ A small document-sharing app. You'll be extending it with features that customer
 
 **What I built** (all three features, behind a small migration system):
 
-1. **Scheduled publishing** — documents can have a future `publish_at`; before then the share link
-   shows "Not yet available". Stored in UTC, displayed local (fixes a latent timezone bug).
-2. **Human-readable IDs** — each document gets a readable slug (`welcome-packet`) that *complements*
-   the share token rather than replacing it (recipient access stays token-only).
+1. **Scheduled publishing** — documents can have a future `publish_at`; before then the link shows
+   "Not yet available". Stored in UTC, displayed local (fixes a latent timezone bug).
+2. **Human-readable IDs** — each document has a readable slug used as a real URL, `/d/welcome-packet`.
+   A direct `?token=` link goes straight in; a bare slug prompts for the email it was shared with and
+   then redirects to that share's token. Readable *and* private — a guessed slug only yields a login
+   prompt (see `DECISIONS.md` §2 for how this decision evolved).
 3. **Fuzzy search** — typo-tolerant search by title on the admin page.
 
+Plus **document takedown** (a reversible live/disabled toggle; disabled reads as an obscure
+not-found) and a pass of UX polish (list redesign, friendly dates, copy-to-clipboard, dark mode).
+
 Schema changes go through `migrations/*.sql` (a runner in `lib/migrate.php`); `schema.sql` is left
-frozen. Document create, scheduling changes, and share creation are audit-logged. The full reasoning
-and rejected alternatives are in **[`DECISIONS.md`](DECISIONS.md)**; agent/workflow setup is in
-**[`CLAUDE.md`](CLAUDE.md)** and `.claude/`.
+frozen. Document creation, scheduling changes, share creation, and enable/disable are audit-logged.
+The full reasoning and rejected alternatives are in **[`DECISIONS.md`](DECISIONS.md)**; agent/workflow
+setup is in **[`CLAUDE.md`](CLAUDE.md)** and `.claude/`.
 
 ```bash
 docker compose up                          # http://localhost:8000 (re-seeds a fresh db.sqlite)
-docker compose exec app php tests/test.php # 10 tests, ≥1 per feature
+docker compose exec app php tests/test.php # 14 tests, ≥1 per feature
 docker compose exec app php migrate.php    # apply migrations standalone
 ```
 
 **Time:** the full graded scope (three features + migrations + a test each + audit logging + agent
-setup) was committed within ~15 min of finishing planning; the remaining commits are optional UX
-polish (list redesign, friendly dates, copy-to-clipboard, dark mode). ~1–1.5h total against the
-3-hour budget — the commit timestamps tell the story, and there's a breakdown in
+setup) was committed within ~15 min of finishing planning; the rest is optional UX polish and a
+couple of review-driven follow-ups (the readable-URL realization and takedown). ~1.5h total against
+the 3-hour budget — the commit timestamps tell the story, and there's a breakdown in
 [`DECISIONS.md`](DECISIONS.md) → *Time spent*.
 
 ---

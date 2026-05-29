@@ -19,23 +19,32 @@ persistent.
 - **Rejected — a full migration framework (Phinx, Doctrine):** far too heavy for a tool this size.
   The changes here are pure DDL; SQL files are the most transparent, reviewable form.
 
-## 2. Readable IDs **complement** the share token (they don't replace it)
+## 2. Readable IDs: the slug is the public URL; the token (or email) is the credential
 
-The decisive factor is **table grain**, not privacy in the abstract:
+**Table grain** frames it: a token lives on `shares` (one per *recipient*, secret, revocable); a
+slug lives on `documents` (one per *document*). They answer different questions, so the slug never
+*replaces* the token — it's an address, not a capability.
 
-- A **token lives on `shares`** — one per *recipient*, secret, revocable.
-- A **slug lives on `documents`** — one per *document*.
+This decision **evolved during review**. I first made the slug staff-facing only and kept recipient
+access token-only — which under-delivered the brief's own words ("type into a URL, paste into an
+email"): there was no URL a person could actually use. So the slug became the **public, readable
+URL** (`/d/welcome-packet`, routed by `router.php`), with access proven two ways:
 
-They answer different questions ("is this person allowed in?" vs. "which document is this?"), so a
-slug *cannot* replace a token without collapsing per-recipient sharing and revocation. The slug is
-therefore a **staff-facing identifier** (admin list, share-by-slug lookup, readable audit log);
-recipient access stays **token-only** in `view.php`. Because the slug is an identifier and not a
-capability, its guessability is harmless. Slugs derive from the title and get a short base36 suffix
-on collision (`welcome-packet-3k`) rather than a counter, so they don't leak how many titles clash.
+- a **direct token link** (`/d/{slug}?token=…`) — the per-recipient share, now with a readable path; or
+- the **bare slug** — prompt for the email the document was shared with; if it matches a share,
+  redirect to that share's token URL. Email is the lightweight credential.
 
-- **Rejected — replace the token with the slug:** breaks the per-recipient access model above.
-- **Rejected — hybrid `/d/{slug}?token=…` recipient URL:** leaks the document slug to recipients
-  and widens the URL surface for nothing the token doesn't already provide.
+So a *guessed* slug only ever yields a login prompt, never the document — readable **and** private.
+A missing or disabled slug returns one **obscure not-found**, so existence never leaks. Slugs derive
+from the title with a short base36 suffix on collision (`welcome-packet-3k`), not a counter, so they
+don't reveal how many titles clash. Email matching is case-insensitive; brute-force rate-limiting is
+noted as future hardening.
+
+- **Rejected — replace the token with the slug:** makes a guessable name the capability; breaks
+  per-recipient sharing and revocation.
+- **Reconsidered — the hybrid readable URL:** I initially rejected `/{slug}?token=` as leaking the
+  slug for no gain. "Paste into an email" flipped that — a link that's both readable *and* secure is
+  exactly the ask — and the email gate adds a way in even without the token in hand.
 
 ## 3. Timezone: store UTC, display local
 
@@ -94,6 +103,18 @@ is legible in the commit history (table → tidy → list redesign). Verified ea
 the page headless and screenshotting, which also caught a dead-end (a clipped action) before it
 shipped.
 
+## 7. Document takedown: a reversible status, not a delete
+
+Staff can disable a document (and re-enable it) from the admin list via an eye/eye-off toggle,
+audit-logged as `disable`/`enable`. A disabled doc shows a "Disabled" pill to staff and reads as the
+same **obscure not-found** to recipients — taking it down doesn't confirm it ever existed. I chose a
+reversible `status` over a hard delete: for a records/civic tool you want to pull a document without
+destroying it or its audit trail. Scheduling (`publish_at`) and status are independent axes, combined
+in one tested decision, `document_view_state()`.
+
+- **Rejected — hard delete:** irreversible, loses history, and trips foreign keys against existing
+  shares. Disable is reversible and auditable.
+
 ## Progressive enhancement: the two places we use JavaScript
 
 The app is otherwise plain server-rendered PHP. JavaScript is used in exactly two places, both
@@ -133,10 +154,13 @@ the real story, on 2026-05-29:
 - **All three features** were committed by **16:43**, and the **full graded deliverable** — migration
   system, a test per feature, audit logging, and the agent setup + decision docs — by **16:47**.
   That's roughly **~10–15 minutes of implementation** after planning.
-- Everything from 16:59 to 17:43 is **optional UX polish that wasn't asked for**: the documents-list
-  redesign, friendly datetimes, copy-to-clipboard, and the light/dark theme.
+- Everything after that is iterative refinement and review-driven follow-ups: UX polish through
+  ~17:47 (documents-list redesign, friendly datetimes, copy-to-clipboard, light/dark theme), then a
+  review pass that added two more features — realizing the readable ID as a real `/d/{slug}` URL
+  with email-based access, and document takedown — committed by **18:14**.
 
-Total wall-clock was about **1–1.5 hours** against the 3-hour budget — and a clear majority of that
-was the optional polish, not the required work. That speed is the point of the exercise for an
-AI-product role: the agentic workflow (plan → implement → render/screenshot → verify → commit) let
-the required scope land fast and left room to iterate on experience.
+Total wall-clock was about **1.5 hours** against the 3-hour budget, and the clear majority was
+optional polish and review-driven follow-ups, not the required scope (done in the first ~11 minutes
+of implementation). That speed is the point of the exercise for an AI-product role: the agentic
+workflow (plan → implement → render/screenshot → verify → commit) let the required scope land fast
+and left room to iterate on both experience and judgment.
