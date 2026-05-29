@@ -1,0 +1,36 @@
+<?php
+
+// Scheduled-publishing helpers.
+//
+// Timezone discipline (the existing code has a latent trap here): SQLite's
+// datetime('now') is UTC, but bootstrap.php sets PHP's default zone to
+// America/Chicago. We resolve it deterministically -- publish_at is always
+// STORED in UTC and only converted to the staff's local zone for display/input.
+// The app's zone is read from date_default_timezone_get() so it stays defined
+// in exactly one place (bootstrap.php).
+
+// Convert a local datetime (as typed into a datetime-local input, in the app's
+// zone) to a UTC string for storage.
+function local_to_utc(string $local): string {
+    $dt = new DateTime($local, new DateTimeZone(date_default_timezone_get()));
+    $dt->setTimezone(new DateTimeZone('UTC'));
+    return $dt->format('Y-m-d H:i:s');
+}
+
+// Convert a stored UTC datetime back to the app's local zone for display.
+function utc_to_local(string $utc): string {
+    $dt = new DateTime($utc, new DateTimeZone('UTC'));
+    $dt->setTimezone(new DateTimeZone(date_default_timezone_get()));
+    return $dt->format('Y-m-d H:i:s');
+}
+
+// Is a document visible to recipients yet? NULL publish_at means "live now".
+// Both arguments are UTC 'Y-m-d H:i:s' strings, which sort lexicographically in
+// chronological order, so a string compare is correct and cheap.
+function is_available(?string $publish_at_utc, ?string $now_utc = null): bool {
+    if ($publish_at_utc === null || $publish_at_utc === '') {
+        return true;
+    }
+    $now_utc = $now_utc ?? gmdate('Y-m-d H:i:s');
+    return $publish_at_utc <= $now_utc;
+}

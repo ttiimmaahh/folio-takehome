@@ -2,25 +2,49 @@
 
 require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/layout.php';
+require __DIR__ . '/../lib/publishing.php';
 
 $staff = current_staff();
 $error = null;
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $action = $_POST['action'] ?? 'create';
+
+    if ($action === 'schedule') {
+        // Reschedule (or clear the schedule for) an existing document.
+        $docId = (int) ($_POST['doc_id'] ?? 0);
+        $publishLocal = trim($_POST['publish_at'] ?? '');
+        $publishUtc = $publishLocal === '' ? null : local_to_utc($publishLocal);
+
+        $stmt = db()->prepare('UPDATE documents SET publish_at = ? WHERE id = ?');
+        $stmt->execute([$publishUtc, $docId]);
+
+        audit_log('schedule', 'document', $docId, ['publish_at' => $publishUtc]);
+
+        header('Location: /admin.php?scheduled=' . $docId);
+        exit;
+    }
+
     $title = trim($_POST['title'] ?? '');
     $body = trim($_POST['body'] ?? '');
+    $publishLocal = trim($_POST['publish_at'] ?? '');
 
     if ($title === '' || $body === '') {
         $error = 'Title and body are required.';
     } else {
+        $publishUtc = $publishLocal === '' ? null : local_to_utc($publishLocal);
+
         $stmt = db()->prepare('
-            INSERT INTO documents (title, body, created_by)
-            VALUES (?, ?, ?)
+            INSERT INTO documents (title, body, created_by, publish_at)
+            VALUES (?, ?, ?, ?)
         ');
-        $stmt->execute([$title, $body, $staff['id']]);
+        $stmt->execute([$title, $body, $staff['id'], $publishUtc]);
         $docId = (int) db()->lastInsertId();
 
-        audit_log('create', 'document', $docId, ['title' => $title]);
+        audit_log('create', 'document', $docId, [
+            'title' => $title,
+            'publish_at' => $publishUtc,
+        ]);
 
         header('Location: /admin.php?created=' . $docId);
         exit;
@@ -44,6 +68,10 @@ render_header('Admin', $staff);
     <div class="banner banner-success">Document #<?= (int) $_GET['created'] ?> created.</div>
 <?php endif ?>
 
+<?php if (!empty($_GET['scheduled'])): ?>
+    <div class="banner banner-success">Schedule updated for document #<?= (int) $_GET['scheduled'] ?>.</div>
+<?php endif ?>
+
 <?php if ($error): ?>
     <div class="banner banner-error"><?= h($error) ?></div>
 <?php endif ?>
@@ -58,6 +86,10 @@ render_header('Admin', $staff);
         <div class="form-field">
             <label for="body">Body</label>
             <textarea id="body" name="body" required></textarea>
+        </div>
+        <div class="form-field">
+            <label for="publish_at">Publish at (optional — leave blank to publish immediately; <?= h(date_default_timezone_get()) ?>)</label>
+            <input type="datetime-local" id="publish_at" name="publish_at">
         </div>
         <button type="submit" class="btn">Create document</button>
     </form>
@@ -75,16 +107,37 @@ render_header('Admin', $staff);
                     <th>Title</th>
                     <th>Creator</th>
                     <th>Created</th>
+                    <th>Visibility</th>
                     <th></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach ($docs as $d): ?>
+                    <?php
+                        $live = is_available($d['publish_at']);
+                        // datetime-local wants 'Y-m-d\TH:i'; convert the stored UTC value to local.
+                        $pubInput = $d['publish_at']
+                            ? str_replace(' ', 'T', substr(utc_to_local($d['publish_at']), 0, 16))
+                            : '';
+                    ?>
                     <tr>
                         <td class="id">#<?= (int) $d['id'] ?></td>
                         <td><?= h($d['title']) ?></td>
                         <td><?= h($d['creator_name']) ?></td>
                         <td><?= h($d['created_at']) ?></td>
+                        <td>
+                            <?php if ($live): ?>
+                                Live
+                            <?php else: ?>
+                                Scheduled: <?= h(utc_to_local($d['publish_at'])) ?>
+                            <?php endif ?>
+                            <form method="post" class="inline-schedule">
+                                <input type="hidden" name="action" value="schedule">
+                                <input type="hidden" name="doc_id" value="<?= (int) $d['id'] ?>">
+                                <input type="datetime-local" name="publish_at" value="<?= h($pubInput) ?>">
+                                <button type="submit" class="btn-link">Update</button>
+                            </form>
+                        </td>
                         <td><a href="/share.php?doc=<?= (int) $d['id'] ?>" class="btn-link">Create share →</a></td>
                     </tr>
                 <?php endforeach ?>
