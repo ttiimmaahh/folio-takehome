@@ -2,6 +2,31 @@
 
 A small document-sharing app. You'll be extending it with features that customers have been asking for.
 
+---
+
+## Submission notes
+
+**What I built** (all three features, behind a small migration system):
+
+1. **Scheduled publishing** — documents can have a future `publish_at`; before then the share link
+   shows "Not yet available". Stored in UTC, displayed local (fixes a latent timezone bug).
+2. **Human-readable IDs** — each document gets a readable slug (`welcome-packet`) that *complements*
+   the share token rather than replacing it (recipient access stays token-only).
+3. **Fuzzy search** — typo-tolerant search by title on the admin page.
+
+Schema changes go through `migrations/*.sql` (a runner in `lib/migrate.php`); `schema.sql` is left
+frozen. Document create, scheduling changes, and share creation are audit-logged. The full reasoning
+and rejected alternatives are in **[`DECISIONS.md`](DECISIONS.md)**; agent/workflow setup is in
+**[`CLAUDE.md`](CLAUDE.md)** and `.claude/`.
+
+```bash
+docker compose up                          # http://localhost:8000 (re-seeds a fresh db.sqlite)
+docker compose exec app php tests/test.php # 9 tests, ≥1 per feature
+docker compose exec app php migrate.php    # apply migrations standalone
+```
+
+---
+
 ## Setup
 
 Requires Docker (with Compose). That's it — PHP, SQLite, and everything else ship inside the container.
