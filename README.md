@@ -21,7 +21,7 @@ and rejected alternatives are in **[`DECISIONS.md`](DECISIONS.md)**; agent/workf
 
 ```bash
 docker compose up                          # http://localhost:8000 (re-seeds a fresh db.sqlite)
-docker compose exec app php tests/test.php # 9 tests, ≥1 per feature
+docker compose exec app php tests/test.php # 10 tests, ≥1 per feature
 docker compose exec app php migrate.php    # apply migrations standalone
 ```
 
