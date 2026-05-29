@@ -80,6 +80,15 @@ Where an LLM genuinely *would* earn its place as this product grows — i.e. wha
 - **Observability:** route every model call through `audit_log` (latency, tokens, outcome) so the
   audit trail doubles as telemetry.
 
+## Progressive enhancement: the one place we use JavaScript
+
+The app is otherwise plain server-rendered PHP with no JS. The single exception is the
+copy-to-clipboard button on the generated share link — clipboard access has no CSS-only
+equivalent, and "copy" is the expected affordance for a long, opaque token URL. It's a tiny inline
+script that degrades gracefully: it uses the Clipboard API where available and falls back to
+`document.execCommand('copy')`, and the link is a real, selectable field either way, so nothing
+breaks without JS.
+
 ## Things in the existing code worth flagging
 
 - **`audit_log()` is hardwired to staff #1** via `current_staff()`. Fine for staff actions, but it

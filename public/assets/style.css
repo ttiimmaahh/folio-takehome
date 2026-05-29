@@ -518,3 +518,104 @@ table.data td.id {
     padding: 0.4rem 0.85rem;
     font-size: 0.85rem;
 }
+
+/* --- Share link result + copy-to-clipboard -------------------------------- */
+.share-ready-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0 0 0.6rem;
+    font-weight: 600;
+}
+
+.copy-field {
+    display: flex;
+    gap: 0.5rem;
+    align-items: stretch;
+}
+
+.copy-input {
+    flex: 1;
+    min-width: 0; /* allow the long URL to truncate inside the flex row */
+    padding: 0.5rem 0.7rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.85rem;
+    color: var(--text);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--success-border);
+    border-radius: var(--radius);
+    text-overflow: ellipsis;
+}
+
+.copy-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.copy-btn {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    padding: 0 0.7rem;
+    color: var(--accent);
+    background: rgba(255, 255, 255, 0.75);
+    border: 1px solid var(--success-border);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.copy-btn:hover {
+    color: var(--accent-hover);
+    background: #fff;
+}
+
+/* Stack both icons in one grid cell and crossfade between them, so the
+   checkmark eases in (and the copy glyph eases out) instead of snapping. */
+.copy-btn .icon-copy,
+.copy-btn .icon-check {
+    grid-area: 1 / 1;
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.copy-btn .icon-check {
+    opacity: 0;
+    transform: scale(0.6);
+}
+
+.copy-btn.is-copied {
+    color: var(--success-text);
+    border-color: var(--success-text);
+}
+
+.copy-btn.is-copied .icon-copy {
+    opacity: 0;
+    transform: scale(0.6);
+}
+
+.copy-btn.is-copied .icon-check {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* "Copied!" confirmation, eased in at the right of the "Share link ready"
+   header. Inherits the header's green; aria-live also announces it. */
+.copy-status {
+    margin-left: auto;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.copy-status.is-visible {
+    opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .copy-btn .icon-copy,
+    .copy-btn .icon-check,
+    .copy-status {
+        transition: none;
+    }
+}

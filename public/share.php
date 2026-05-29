@@ -63,10 +63,63 @@ render_header('Share · ' . $doc['title'], $staff);
 <?php endif ?>
 
 <?php if ($created_token): ?>
-    <div class="banner banner-success">
-        Share link ready:
-        <code>http://<?= h($_SERVER['HTTP_HOST']) ?>/view.php?token=<?= h($created_token) ?></code>
+    <?php $shareUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/view.php?token=' . $created_token; ?>
+    <div class="banner banner-success share-ready">
+        <p class="share-ready-label">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M20 6 9 17l-5-5"></path>
+            </svg>
+            Share link ready
+            <span class="copy-status" role="status" aria-live="polite"></span>
+        </p>
+        <div class="copy-field">
+            <input type="text" class="copy-input" value="<?= h($shareUrl) ?>" readonly aria-label="Share link">
+            <button type="button" class="copy-btn" aria-label="Copy link" title="Copy link">
+                <svg class="icon-copy" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                    <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                </svg>
+                <svg class="icon-check" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M20 6 9 17l-5-5"></path>
+                </svg>
+            </button>
+        </div>
     </div>
+    <script>
+    (function () {
+        var btn = document.querySelector('.copy-btn');
+        var input = document.querySelector('.copy-input');
+        var status = document.querySelector('.copy-status');
+        if (!btn || !input) { return; }
+        btn.addEventListener('click', function () {
+            var confirm = function () {
+                btn.classList.add('is-copied');
+                if (status) {
+                    status.textContent = 'Copied!';
+                    status.classList.add('is-visible');
+                }
+                setTimeout(function () {
+                    btn.classList.remove('is-copied');
+                    if (status) {
+                        status.classList.remove('is-visible');
+                        setTimeout(function () { status.textContent = ''; }, 220);
+                    }
+                }, 1800);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(input.value).then(confirm, fallback);
+            } else {
+                fallback();
+            }
+            function fallback() {
+                input.focus();
+                input.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                confirm();
+            }
+        });
+    })();
+    </script>
 <?php endif ?>
 
 <section class="card">
