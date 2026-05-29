@@ -485,6 +485,16 @@ table.data td.id {
     border-color: var(--warn-border);
 }
 
+.pill-disabled {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: var(--border-strong);
+}
+
+.status-form {
+    display: inline-flex;
+}
+
 .doc-actions {
     display: flex;
     align-items: center;
@@ -498,12 +508,25 @@ table.data td.id {
     justify-content: center;
     color: var(--accent);
     padding: 0.4rem;
+    border: none;
+    background: none;
     border-radius: var(--radius);
+    cursor: pointer;
     transition: background-color 0.15s, color 0.15s;
 }
 
 .icon-link:hover {
     color: var(--accent-hover);
+    background: var(--accent-soft);
+}
+
+/* Secondary icon action (the visibility toggle) reads quieter than share. */
+.icon-link.icon-muted {
+    color: var(--text-muted);
+}
+
+.icon-link.icon-muted:hover {
+    color: var(--text);
     background: var(--accent-soft);
 }
 

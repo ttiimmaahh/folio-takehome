@@ -27,6 +27,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
+    if ($action === 'set_status') {
+        // Take a document down (or bring it back). Disabled docs read as
+        // not-found to recipients.
+        $docId = (int) ($_POST['doc_id'] ?? 0);
+        $status = ($_POST['status'] ?? '') === 'disabled' ? 'disabled' : 'live';
+
+        $stmt = db()->prepare('UPDATE documents SET status = ? WHERE id = ?');
+        $stmt->execute([$status, $docId]);
+
+        audit_log($status === 'disabled' ? 'disable' : 'enable', 'document', $docId, ['status' => $status]);
+
+        header('Location: /admin.php?status_changed=' . $docId);
+        exit;
+    }
+
     $title = trim($_POST['title'] ?? '');
     $body = trim($_POST['body'] ?? '');
     $publishLocal = trim($_POST['publish_at'] ?? '');
@@ -81,6 +96,10 @@ render_header('Admin', $staff);
     <div class="banner banner-success">Schedule updated for document #<?= (int) $_GET['scheduled'] ?>.</div>
 <?php endif ?>
 
+<?php if (!empty($_GET['status_changed'])): ?>
+    <div class="banner banner-success">Visibility updated for document #<?= (int) $_GET['status_changed'] ?>.</div>
+<?php endif ?>
+
 <?php if ($error): ?>
     <div class="banner banner-error"><?= h($error) ?></div>
 <?php endif ?>
@@ -129,10 +148,12 @@ render_header('Admin', $staff);
                     <div class="doc-main">
                         <div class="doc-headline">
                             <span class="doc-title"><?= h($d['title']) ?></span>
-                            <?php if ($live): ?>
-                                <span class="pill pill-live">Live</span>
-                            <?php else: ?>
+                            <?php if (($d['status'] ?? 'live') === 'disabled'): ?>
+                                <span class="pill pill-disabled">Disabled</span>
+                            <?php elseif (!$live): ?>
                                 <span class="pill pill-scheduled">Scheduled</span>
+                            <?php else: ?>
+                                <span class="pill pill-live">Live</span>
                             <?php endif ?>
                         </div>
                         <div class="doc-meta">
@@ -156,6 +177,27 @@ render_header('Admin', $staff);
                         </details>
                     </div>
                     <div class="doc-actions">
+                        <?php $disabled = ($d['status'] ?? 'live') === 'disabled'; ?>
+                        <form method="post" class="status-form">
+                            <input type="hidden" name="action" value="set_status">
+                            <input type="hidden" name="doc_id" value="<?= (int) $d['id'] ?>">
+                            <input type="hidden" name="status" value="<?= $disabled ? 'live' : 'disabled' ?>">
+                            <button type="submit" class="icon-link icon-muted" aria-label="<?= $disabled ? 'Enable document' : 'Disable document' ?>" title="<?= $disabled ? 'Enable document' : 'Disable document' ?>">
+                                <?php if ($disabled): ?>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
+                                        <circle cx="12" cy="12" r="3"></circle>
+                                    </svg>
+                                <?php else: ?>
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"></path>
+                                        <path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"></path>
+                                        <path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"></path>
+                                        <path d="m2 2 20 20"></path>
+                                    </svg>
+                                <?php endif ?>
+                            </button>
+                        </form>
                         <a href="/share.php?doc=<?= h($d['slug'] ?? (string) $d['id']) ?>" class="icon-link" aria-label="Create share link" title="Create share link">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M12 2v13"></path>
