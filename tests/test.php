@@ -3,6 +3,7 @@
 require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/publishing.php';
 require __DIR__ . '/../lib/slug.php';
+require __DIR__ . '/../lib/search.php';
 
 system('php ' . escapeshellarg(__DIR__ . '/../seed.php') . ' > /dev/null', $rc);
 if ($rc !== 0) {
@@ -102,6 +103,22 @@ test('unique_slug disambiguates duplicate titles', function () {
         str_starts_with($second, 'quarterly-report-'),
         "collision slug should keep the base with a suffix, got {$second}"
     );
+});
+
+// --- Share by name (fuzzy search) -------------------------------------------
+// Why fuzzy: staff search by half-remembered titles. The test pins the intent
+// (typos still match, unrelated words don't) rather than the scoring internals.
+
+test('search finds a document despite a typo in the query', function () {
+    // seeded title is 'Welcome Packet'
+    $hits = search_documents(db(), 'wlecome');
+    assert_true(count($hits) >= 1, 'a one-transposition typo should still match');
+    assert_true($hits[0]['title'] === 'Welcome Packet', 'best match should be Welcome Packet');
+});
+
+test('search excludes unrelated titles', function () {
+    $titles = array_column(search_documents(db(), 'invoice'), 'title');
+    assert_true(!in_array('Welcome Packet', $titles, true), 'unrelated query must not match');
 });
 
 echo "\n{$pass} passed, {$fail} failed.\n";

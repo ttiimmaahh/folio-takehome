@@ -332,3 +332,42 @@ table.data td.id {
     margin: 0;
     font-size: 0.95rem;
 }
+
+.search-form {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.search-form input[type=search] {
+    flex: 1;
+    padding: 0.55rem 0.75rem;
+    font: inherit;
+    font-size: 0.95rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.search-form input[type=search]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+}
+
+.inline-schedule {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-top: 0.4rem;
+}
+
+.inline-schedule input[type=datetime-local] {
+    padding: 0.35rem 0.5rem;
+    font: inherit;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    background: var(--surface);
+}

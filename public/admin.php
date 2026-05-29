@@ -4,6 +4,7 @@ require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/layout.php';
 require __DIR__ . '/../lib/publishing.php';
 require __DIR__ . '/../lib/slug.php';
+require __DIR__ . '/../lib/search.php';
 
 $staff = current_staff();
 $error = null;
@@ -54,12 +55,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$docs = db()->query('
-    SELECT d.*, s.name AS creator_name
-    FROM documents d
-    JOIN staff s ON s.id = d.created_by
-    ORDER BY d.created_at DESC
-')->fetchAll();
+$query = trim($_GET['q'] ?? '');
+if ($query !== '') {
+    $docs = search_documents(db(), $query);
+} else {
+    $docs = db()->query('
+        SELECT d.*, s.name AS creator_name
+        FROM documents d
+        JOIN staff s ON s.id = d.created_by
+        ORDER BY d.created_at DESC
+    ')->fetchAll();
+}
 
 render_header('Admin', $staff);
 ?>
@@ -100,8 +106,15 @@ render_header('Admin', $staff);
 
 <section class="card">
     <h2 class="card-title">Documents</h2>
+    <form method="get" class="search-form">
+        <input type="search" name="q" value="<?= h($query) ?>" placeholder="Search by title…">
+        <button type="submit" class="btn">Search</button>
+        <?php if ($query !== ''): ?>
+            <a href="/admin.php" class="btn-link">Clear</a>
+        <?php endif ?>
+    </form>
     <?php if (empty($docs)): ?>
-        <p class="empty">No documents yet.</p>
+        <p class="empty"><?= $query !== '' ? 'No documents match “' . h($query) . '”.' : 'No documents yet.' ?></p>
     <?php else: ?>
         <table class="data">
             <thead>
