@@ -25,6 +25,12 @@ docker compose exec app php tests/test.php # 10 tests, ≥1 per feature
 docker compose exec app php migrate.php    # apply migrations standalone
 ```
 
+**Time:** the full graded scope (three features + migrations + a test each + audit logging + agent
+setup) was committed within ~15 min of finishing planning; the remaining commits are optional UX
+polish (list redesign, friendly dates, copy-to-clipboard, dark mode). ~1–1.5h total against the
+3-hour budget — the commit timestamps tell the story, and there's a breakdown in
+[`DECISIONS.md`](DECISIONS.md) → *Time spent*.
+
 ---
 
 ## Setup

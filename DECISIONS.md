@@ -80,7 +80,21 @@ Where an LLM genuinely *would* earn its place as this product grows — i.e. wha
 - **Observability:** route every model call through `audit_log` (latency, tokens, outcome) so the
   audit trail doubles as telemetry.
 
-## Progressive enhancement: the one place we use JavaScript
+## 6. UI: a stacked list, not a table — the features reshaped the layout
+
+Each new feature added information to a document row — a slug, a created date, a Live/Scheduled
+status, a reschedule control, a share action. The original `<table>` couldn't absorb that on a
+~650px card: columns crammed and the row action wrapped, then clipped. Rather than fight it, the
+documents list became a **stacked list** — title + status pill, one muted metadata line
+(`slug · creator · created`), the reschedule tucked into a native `<details>` disclosure (no JS),
+and the share as an icon. Datetimes render friendly and local (`May 29, 2026 at 4:18 PM CDT`).
+
+The point: the *functional* requirements drove the design, not the reverse — and the progression
+is legible in the commit history (table → tidy → list redesign). Verified each step by rendering
+the page headless and screenshotting, which also caught a dead-end (a clipped action) before it
+shipped.
+
+## Progressive enhancement: the two places we use JavaScript
 
 The app is otherwise plain server-rendered PHP. JavaScript is used in exactly two places, both
 where the platform offers no CSS-only equivalent and both degrading gracefully:
@@ -108,3 +122,21 @@ where the platform offers no CSS-only equivalent and both degrading gracefully:
 Recipient-view audit events; share-link revocation/expiry (the schema is ready for it); the semantic
 search + eval harness above; auth + tenant scoping; and pagination/index on the search path once the
 document count is large enough to outgrow the O(n) scan.
+
+## Time spent
+
+The brief budgets ~3 hours. The commit timestamps (`git log --date=format:'%H:%M' main..HEAD`) tell
+the real story, on 2026-05-29:
+
+- Planning and context-gathering came first (reading the code, a written plan, a few clarifying
+  questions about the open calls). First commit landed at **16:36**.
+- **All three features** were committed by **16:43**, and the **full graded deliverable** — migration
+  system, a test per feature, audit logging, and the agent setup + decision docs — by **16:47**.
+  That's roughly **~10–15 minutes of implementation** after planning.
+- Everything from 16:59 to 17:43 is **optional UX polish that wasn't asked for**: the documents-list
+  redesign, friendly datetimes, copy-to-clipboard, and the light/dark theme.
+
+Total wall-clock was about **1–1.5 hours** against the 3-hour budget — and a clear majority of that
+was the optional polish, not the required work. That speed is the point of the exercise for an
+AI-product role: the agentic workflow (plan → implement → render/screenshot → verify → commit) let
+the required scope land fast and left room to iterate on experience.
