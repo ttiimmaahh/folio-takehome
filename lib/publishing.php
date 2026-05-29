@@ -18,10 +18,20 @@ function local_to_utc(string $local): string {
 }
 
 // Convert a stored UTC datetime back to the app's local zone for display.
+// Machine format ('Y-m-d H:i:s') -- used to seed the datetime-local input.
 function utc_to_local(string $utc): string {
     $dt = new DateTime($utc, new DateTimeZone('UTC'));
     $dt->setTimezone(new DateTimeZone(date_default_timezone_get()));
     return $dt->format('Y-m-d H:i:s');
+}
+
+// Friendly local rendering of a stored UTC datetime, e.g. "May 29, 2026 at
+// 4:13 PM CDT". The timezone abbreviation removes ambiguity about when a
+// document actually goes live. Used wherever a datetime is shown to a human.
+function format_datetime(string $utc): string {
+    $dt = new DateTime($utc, new DateTimeZone('UTC'));
+    $dt->setTimezone(new DateTimeZone(date_default_timezone_get()));
+    return $dt->format('M j, Y \a\t g:i A T');
 }
 
 // Is a document visible to recipients yet? NULL publish_at means "live now".

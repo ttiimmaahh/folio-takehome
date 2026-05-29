@@ -34,8 +34,7 @@ if (!is_available($doc['publish_at'])) {
     <div class="centered-message">
         <h1>Not yet available</h1>
         <p>This document is scheduled to become available on
-            <strong><?= h(utc_to_local($doc['publish_at'])) ?></strong>
-            (<?= h(date_default_timezone_get()) ?>).</p>
+            <strong><?= h(format_datetime($doc['publish_at'])) ?></strong>.</p>
         <p>Please check back then.</p>
     </div>
     <?php

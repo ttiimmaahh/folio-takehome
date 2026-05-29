@@ -70,6 +70,14 @@ test('a past publish_at is available', function () {
     );
 });
 
+test('format_datetime renders a stored UTC time as a friendly local string', function () {
+    // 14:00 UTC on a summer date is 9:00 AM in America/Chicago (CDT, UTC-5).
+    assert_true(
+        format_datetime('2026-07-01 14:00:00') === 'Jul 1, 2026 at 9:00 AM CDT',
+        'got: ' . format_datetime('2026-07-01 14:00:00')
+    );
+});
+
 test('local input round-trips through UTC storage', function () {
     // Guards the timezone trap: store UTC, display local, get the same wall time.
     $local = '2026-07-01 09:30:00';

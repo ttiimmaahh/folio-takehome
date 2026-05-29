@@ -140,10 +140,10 @@ render_header('Admin', $staff);
                             <span class="dot">·</span>
                             <span><?= h($d['creator_name']) ?></span>
                             <span class="dot">·</span>
-                            <span>Created <?= h($d['created_at']) ?></span>
+                            <span>Created <?= h(format_datetime($d['created_at'])) ?></span>
                         </div>
                         <?php if (!$live): ?>
-                            <p class="doc-schedule-note">Goes live <?= h(utc_to_local($d['publish_at'])) ?></p>
+                            <p class="doc-schedule-note">Goes live <?= h(format_datetime($d['publish_at'])) ?></p>
                         <?php endif ?>
                         <details class="doc-schedule">
                             <summary><?= $d['publish_at'] ? 'Reschedule' : 'Schedule publishing' ?></summary>
