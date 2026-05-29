@@ -116,6 +116,7 @@ render_header('Admin', $staff);
     <?php if (empty($docs)): ?>
         <p class="empty"><?= $query !== '' ? 'No documents match “' . h($query) . '”.' : 'No documents yet.' ?></p>
     <?php else: ?>
+        <div class="table-scroll">
         <table class="data">
             <thead>
                 <tr>
@@ -140,7 +141,8 @@ render_header('Admin', $staff);
                         <td class="id"><code><?= h($d['slug'] ?? '') ?></code></td>
                         <td><?= h($d['title']) ?></td>
                         <td><?= h($d['creator_name']) ?></td>
-                        <td><?= h($d['created_at']) ?></td>
+                        <?php $createdParts = explode(' ', (string) $d['created_at'], 2); ?>
+                        <td class="created"><?= h($createdParts[0]) ?><?php if (isset($createdParts[1])): ?><br><?= h($createdParts[1]) ?><?php endif ?></td>
                         <td>
                             <?php if ($live): ?>
                                 Live
@@ -154,11 +156,22 @@ render_header('Admin', $staff);
                                 <button type="submit" class="btn-link">Update</button>
                             </form>
                         </td>
-                        <td><a href="/share.php?doc=<?= h($d['slug'] ?? (string) $d['id']) ?>" class="btn-link">Create share →</a></td>
+                        <td class="row-action">
+                            <a href="/share.php?doc=<?= h($d['slug'] ?? (string) $d['id']) ?>" class="icon-link" aria-label="Create share link" title="Create share link">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="18" cy="5" r="3"></circle>
+                                    <circle cx="6" cy="12" r="3"></circle>
+                                    <circle cx="18" cy="19" r="3"></circle>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                </svg>
+                            </a>
+                        </td>
                     </tr>
                 <?php endforeach ?>
             </tbody>
         </table>
+        </div>
     <?php endif ?>
 </section>
 
