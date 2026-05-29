@@ -44,3 +44,17 @@ function is_available(?string $publish_at_utc, ?string $now_utc = null): bool {
     $now_utc = $now_utc ?? gmdate('Y-m-d H:i:s');
     return $publish_at_utc <= $now_utc;
 }
+
+// Recipient-facing visibility of a found document, as a single decision:
+//   'unavailable' -> disabled/taken down (shown as an obscure not-found)
+//   'not_yet'     -> live but its publish time is in the future
+//   'ok'          -> viewable now
+function document_view_state(array $doc, ?string $now_utc = null): string {
+    if (($doc['status'] ?? 'live') === 'disabled') {
+        return 'unavailable';
+    }
+    if (!is_available($doc['publish_at'] ?? null, $now_utc)) {
+        return 'not_yet';
+    }
+    return 'ok';
+}

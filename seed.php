@@ -39,6 +39,6 @@ $stmt = $pdo->prepare('
 $stmt->execute([$docId, $token, 'recipient@example.com']);
 
 echo "Seeded db.sqlite.\n";
-echo "Admin:        http://localhost:8000/admin.php\n";
-echo "Sample doc:   {$slug}\n";
-echo "Sample share: http://localhost:8000/view.php?token={$token}\n";
+echo "Admin:         http://localhost:8000/admin.php\n";
+echo "Readable URL:  http://localhost:8000/d/{$slug}  (prompts for the recipient email)\n";
+echo "Direct share:  http://localhost:8000/d/{$slug}?token={$token}\n";

@@ -63,7 +63,7 @@ render_header('Share · ' . $doc['title'], $staff);
 <?php endif ?>
 
 <?php if ($created_token): ?>
-    <?php $shareUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/view.php?token=' . $created_token; ?>
+    <?php $shareUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/d/' . rawurlencode($doc['slug']) . '?token=' . $created_token; ?>
     <div class="banner banner-success share-ready">
         <p class="share-ready-label">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">

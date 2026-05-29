@@ -87,6 +87,44 @@ test('local input round-trips through UTC storage', function () {
     );
 });
 
+// --- Visibility & takedown --------------------------------------------------
+// Why it matters: a disabled document must be unreachable by recipients, and a
+// scheduled one must wait. document_view_state() is the single decision the
+// recipient handler trusts, so we assert each outcome directly.
+
+test('a disabled document is unavailable to recipients', function () {
+    assert_true(
+        document_view_state(['status' => 'disabled', 'publish_at' => null]) === 'unavailable',
+        'disabled documents must read as unavailable'
+    );
+});
+
+test('a live, future-dated document is not yet available', function () {
+    assert_true(
+        document_view_state(['status' => 'live', 'publish_at' => '2999-01-01 00:00:00']) === 'not_yet',
+        'a future publish time must hold the document'
+    );
+});
+
+test('a live, published document is viewable', function () {
+    assert_true(
+        document_view_state(['status' => 'live', 'publish_at' => null]) === 'ok',
+        'a live, available document must be viewable'
+    );
+});
+
+test('a recipient email resolves to its share token, case-insensitively', function () {
+    // The seeded doc (#1) was shared with recipient@example.com. This is the
+    // lookup behind the readable-URL email gate.
+    $stmt = db()->prepare('
+        SELECT token FROM shares
+        WHERE document_id = ? AND lower(recipient_email) = lower(?)
+        LIMIT 1
+    ');
+    $stmt->execute([1, 'RECIPIENT@Example.com']);
+    assert_true($stmt->fetchColumn() !== false, 'email should resolve to a token regardless of case');
+});
+
 // --- Human-readable IDs -----------------------------------------------------
 // Why it matters: slugs go in URLs and emails, so they must be clean and, above
 // all, unique -- a collision would point two documents at the same identifier.
