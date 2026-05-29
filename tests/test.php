@@ -2,6 +2,7 @@
 
 require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/publishing.php';
+require __DIR__ . '/../lib/slug.php';
 
 system('php ' . escapeshellarg(__DIR__ . '/../seed.php') . ' > /dev/null', $rc);
 if ($rc !== 0) {
@@ -74,6 +75,32 @@ test('local input round-trips through UTC storage', function () {
     assert_true(
         utc_to_local(local_to_utc($local)) === $local,
         'round-trip changed the wall-clock time: ' . utc_to_local(local_to_utc($local))
+    );
+});
+
+// --- Human-readable IDs -----------------------------------------------------
+// Why it matters: slugs go in URLs and emails, so they must be clean and, above
+// all, unique -- a collision would point two documents at the same identifier.
+
+test('slugify produces clean kebab-case', function () {
+    assert_true(
+        slugify('Welcome Packet 2026!') === 'welcome-packet-2026',
+        'got: ' . slugify('Welcome Packet 2026!')
+    );
+});
+
+test('unique_slug disambiguates duplicate titles', function () {
+    $pdo = db();
+    $first = unique_slug($pdo, 'Quarterly Report');
+    $pdo->prepare('INSERT INTO documents (title, body, created_by, slug) VALUES (?, ?, 1, ?)')
+        ->execute(['Quarterly Report', 'body', $first]);
+
+    $second = unique_slug($pdo, 'Quarterly Report');
+    assert_true($first === 'quarterly-report', "first slug should be the clean base, got {$first}");
+    assert_true($first !== $second, "second slug must differ from the first ({$first})");
+    assert_true(
+        str_starts_with($second, 'quarterly-report-'),
+        "collision slug should keep the base with a suffix, got {$second}"
     );
 });
 

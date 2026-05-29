@@ -2,6 +2,7 @@
 
 require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/migrate.php';
+require __DIR__ . '/lib/slug.php';
 
 $dbPath = __DIR__ . '/db.sqlite';
 if (file_exists($dbPath)) {
@@ -17,13 +18,16 @@ $pdo->exec("
         ('freddy@folio.example', 'Freddy Folio')
 ");
 
+$title = 'Welcome Packet';
+$slug = unique_slug($pdo, $title);
 $stmt = $pdo->prepare('
-    INSERT INTO documents (title, body, created_by)
-    VALUES (?, ?, 1)
+    INSERT INTO documents (title, body, created_by, slug)
+    VALUES (?, ?, 1, ?)
 ');
 $stmt->execute([
-    'Welcome Packet',
+    $title,
     "Welcome to Folio!\n\nThis is the body of your welcome packet.",
+    $slug,
 ]);
 $docId = (int) $pdo->lastInsertId();
 
@@ -36,4 +40,5 @@ $stmt->execute([$docId, $token, 'recipient@example.com']);
 
 echo "Seeded db.sqlite.\n";
 echo "Admin:        http://localhost:8000/admin.php\n";
+echo "Sample doc:   {$slug}\n";
 echo "Sample share: http://localhost:8000/view.php?token={$token}\n";

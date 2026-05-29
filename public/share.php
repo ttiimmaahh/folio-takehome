@@ -4,9 +4,16 @@ require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/layout.php';
 
 $staff = current_staff();
-$docId = (int) ($_GET['doc'] ?? 0);
-$stmt = db()->prepare('SELECT * FROM documents WHERE id = ?');
-$stmt->execute([$docId]);
+
+// Staff can reference a document by its readable slug or its numeric id.
+$docParam = trim((string) ($_GET['doc'] ?? ''));
+if ($docParam !== '' && ctype_digit($docParam)) {
+    $stmt = db()->prepare('SELECT * FROM documents WHERE id = ?');
+    $stmt->execute([(int) $docParam]);
+} else {
+    $stmt = db()->prepare('SELECT * FROM documents WHERE slug = ?');
+    $stmt->execute([$docParam]);
+}
 $doc = $stmt->fetch();
 
 if (!$doc) {

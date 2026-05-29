@@ -3,6 +3,7 @@
 require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/layout.php';
 require __DIR__ . '/../lib/publishing.php';
+require __DIR__ . '/../lib/slug.php';
 
 $staff = current_staff();
 $error = null;
@@ -33,16 +34,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Title and body are required.';
     } else {
         $publishUtc = $publishLocal === '' ? null : local_to_utc($publishLocal);
+        $slug = unique_slug(db(), $title);
 
         $stmt = db()->prepare('
-            INSERT INTO documents (title, body, created_by, publish_at)
-            VALUES (?, ?, ?, ?)
+            INSERT INTO documents (title, body, created_by, publish_at, slug)
+            VALUES (?, ?, ?, ?, ?)
         ');
-        $stmt->execute([$title, $body, $staff['id'], $publishUtc]);
+        $stmt->execute([$title, $body, $staff['id'], $publishUtc, $slug]);
         $docId = (int) db()->lastInsertId();
 
         audit_log('create', 'document', $docId, [
             'title' => $title,
+            'slug' => $slug,
             'publish_at' => $publishUtc,
         ]);
 
@@ -103,7 +106,7 @@ render_header('Admin', $staff);
         <table class="data">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Slug</th>
                     <th>Title</th>
                     <th>Creator</th>
                     <th>Created</th>
@@ -121,7 +124,7 @@ render_header('Admin', $staff);
                             : '';
                     ?>
                     <tr>
-                        <td class="id">#<?= (int) $d['id'] ?></td>
+                        <td class="id"><code><?= h($d['slug'] ?? '') ?></code></td>
                         <td><?= h($d['title']) ?></td>
                         <td><?= h($d['creator_name']) ?></td>
                         <td><?= h($d['created_at']) ?></td>
@@ -138,7 +141,7 @@ render_header('Admin', $staff);
                                 <button type="submit" class="btn-link">Update</button>
                             </form>
                         </td>
-                        <td><a href="/share.php?doc=<?= (int) $d['id'] ?>" class="btn-link">Create share →</a></td>
+                        <td><a href="/share.php?doc=<?= h($d['slug'] ?? (string) $d['id']) ?>" class="btn-link">Create share →</a></td>
                     </tr>
                 <?php endforeach ?>
             </tbody>
