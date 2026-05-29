@@ -3,3 +3,9 @@ db.sqlite
 .DS_Store
 .idea/
 .vscode/
+
+# Local working notes / process docs — not part of the deliverable
+docs/
+
+# Planning artifacts (annotated with plannotator) — workflow, not deliverable
+plans/
