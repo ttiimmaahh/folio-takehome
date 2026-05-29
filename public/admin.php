@@ -116,60 +116,57 @@ render_header('Admin', $staff);
     <?php if (empty($docs)): ?>
         <p class="empty"><?= $query !== '' ? 'No documents match “' . h($query) . '”.' : 'No documents yet.' ?></p>
     <?php else: ?>
-        <div class="table-scroll">
-        <table class="data">
-            <thead>
-                <tr>
-                    <th>Slug</th>
-                    <th>Title</th>
-                    <th>Creator</th>
-                    <th>Created</th>
-                    <th>Visibility</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($docs as $d): ?>
-                    <?php
-                        $live = is_available($d['publish_at']);
-                        // datetime-local wants 'Y-m-d\TH:i'; convert the stored UTC value to local.
-                        $pubInput = $d['publish_at']
-                            ? str_replace(' ', 'T', substr(utc_to_local($d['publish_at']), 0, 16))
-                            : '';
-                    ?>
-                    <tr>
-                        <td class="id"><code><?= h($d['slug'] ?? '') ?></code></td>
-                        <td><?= h($d['title']) ?></td>
-                        <td><?= h($d['creator_name']) ?></td>
-                        <?php $createdParts = explode(' ', (string) $d['created_at'], 2); ?>
-                        <td class="created"><?= h($createdParts[0]) ?><?php if (isset($createdParts[1])): ?><br><?= h($createdParts[1]) ?><?php endif ?></td>
-                        <td>
+        <ul class="doc-list">
+            <?php foreach ($docs as $d): ?>
+                <?php
+                    $live = is_available($d['publish_at']);
+                    // datetime-local wants 'Y-m-d\TH:i'; convert the stored UTC value to local.
+                    $pubInput = $d['publish_at']
+                        ? str_replace(' ', 'T', substr(utc_to_local($d['publish_at']), 0, 16))
+                        : '';
+                ?>
+                <li class="doc-item">
+                    <div class="doc-main">
+                        <div class="doc-headline">
+                            <span class="doc-title"><?= h($d['title']) ?></span>
                             <?php if ($live): ?>
-                                Live
+                                <span class="pill pill-live">Live</span>
                             <?php else: ?>
-                                Scheduled: <?= h(utc_to_local($d['publish_at'])) ?>
+                                <span class="pill pill-scheduled">Scheduled</span>
                             <?php endif ?>
-                            <form method="post" class="inline-schedule">
+                        </div>
+                        <div class="doc-meta">
+                            <code class="doc-slug"><?= h($d['slug'] ?? '') ?></code>
+                            <span class="dot">·</span>
+                            <span><?= h($d['creator_name']) ?></span>
+                            <span class="dot">·</span>
+                            <span>Created <?= h($d['created_at']) ?></span>
+                        </div>
+                        <?php if (!$live): ?>
+                            <p class="doc-schedule-note">Goes live <?= h(utc_to_local($d['publish_at'])) ?></p>
+                        <?php endif ?>
+                        <details class="doc-schedule">
+                            <summary><?= $d['publish_at'] ? 'Reschedule' : 'Schedule publishing' ?></summary>
+                            <form method="post" class="schedule-form">
                                 <input type="hidden" name="action" value="schedule">
                                 <input type="hidden" name="doc_id" value="<?= (int) $d['id'] ?>">
                                 <input type="datetime-local" name="publish_at" value="<?= h($pubInput) ?>">
-                                <button type="submit" class="btn-link">Update</button>
+                                <button type="submit" class="btn btn-small">Update</button>
                             </form>
-                        </td>
-                        <td class="row-action">
-                            <a href="/share.php?doc=<?= h($d['slug'] ?? (string) $d['id']) ?>" class="icon-link" aria-label="Create share link" title="Create share link">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                    <path d="M12 2v13"></path>
-                                    <path d="m16 6-4-4-4 4"></path>
-                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
-                                </svg>
-                            </a>
-                        </td>
-                    </tr>
-                <?php endforeach ?>
-            </tbody>
-        </table>
-        </div>
+                        </details>
+                    </div>
+                    <div class="doc-actions">
+                        <a href="/share.php?doc=<?= h($d['slug'] ?? (string) $d['id']) ?>" class="icon-link" aria-label="Create share link" title="Create share link">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M12 2v13"></path>
+                                <path d="m16 6-4-4-4 4"></path>
+                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                            </svg>
+                        </a>
+                    </div>
+                </li>
+            <?php endforeach ?>
+        </ul>
     <?php endif ?>
 </section>
 

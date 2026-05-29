@@ -260,7 +260,7 @@ table.data {
 
 table.data th {
     text-align: left;
-    padding: 0.55rem 0.6rem;
+    padding: 0.55rem 0.75rem;
     font-size: 0.72rem;
     font-weight: 600;
     color: var(--text-muted);
@@ -270,39 +270,9 @@ table.data th {
 }
 
 table.data td {
-    padding: 0.6rem;
+    padding: 0.7rem 0.75rem;
     border-bottom: 1px solid var(--border);
-    vertical-align: top;
-}
-
-/* Compact icon action (the share link) sits in a narrow trailing column. */
-.row-action {
-    text-align: right;
-    white-space: nowrap;
-}
-
-.icon-link {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--accent);
-    padding: 0.3rem;
-    border-radius: var(--radius);
-}
-
-.icon-link:hover {
-    color: var(--accent-hover);
-    background: rgba(15, 118, 110, 0.1);
-}
-
-/* Keep the inline reschedule "Update" link on one line. */
-.inline-schedule .btn-link {
-    white-space: nowrap;
-}
-
-/* Let the table scroll within its card rather than overflow it on narrow widths. */
-.table-scroll {
-    overflow-x: auto;
+    vertical-align: middle;
 }
 
 table.data tr:last-child td {
@@ -314,11 +284,6 @@ table.data td.id {
     font-variant-numeric: tabular-nums;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 0.85rem;
-}
-
-/* Keep the timestamp from breaking mid-token (date on one line, time on the next). */
-table.data td.created {
-    white-space: nowrap;
 }
 
 .meta {
@@ -391,22 +356,165 @@ table.data td.created {
     box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
 }
 
-.inline-schedule {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.4rem;
-    align-items: center;
-    margin-top: 0.4rem;
+/* --- Documents list -------------------------------------------------------
+   A stacked list rather than a wide table: a title + status pill, one muted
+   metadata line, and the reschedule control tucked into a native <details>
+   disclosure so each row stays uncluttered and readable. */
+.doc-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
 }
 
-.inline-schedule input[type=datetime-local] {
-    width: 160px;
+.doc-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.doc-item:first-child { padding-top: 0.25rem; }
+.doc-item:last-child { border-bottom: none; padding-bottom: 0.25rem; }
+
+.doc-headline {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+}
+
+.doc-title {
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--text);
+}
+
+.doc-meta {
+    margin-top: 0.3rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+}
+
+.doc-meta .dot { color: var(--border-strong); }
+
+.doc-slug {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.8rem;
+}
+
+.doc-schedule-note {
+    margin: 0.3rem 0 0;
+    font-size: 0.82rem;
+    color: var(--warn-text);
+}
+
+.pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    border: 1px solid;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.pill::before {
+    content: "";
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+.pill-live {
+    background: var(--success-bg);
+    color: var(--success-text);
+    border-color: var(--success-border);
+}
+
+.pill-scheduled {
+    background: var(--warn-bg);
+    color: var(--warn-text);
+    border-color: var(--warn-border);
+}
+
+.doc-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.icon-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent);
+    padding: 0.4rem;
+    border-radius: var(--radius);
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.icon-link:hover {
+    color: var(--accent-hover);
+    background: var(--accent-soft);
+}
+
+.doc-schedule {
+    margin-top: 0.55rem;
+}
+
+.doc-schedule > summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+    list-style: none;
+    color: var(--accent);
+    font-size: 0.8rem;
+    font-weight: 500;
+    user-select: none;
+}
+
+.doc-schedule > summary::-webkit-details-marker { display: none; }
+
+.doc-schedule > summary::before {
+    content: "▸";
+    font-size: 0.65rem;
+}
+
+.doc-schedule[open] > summary::before { content: "▾"; }
+
+.schedule-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.55rem;
+}
+
+.schedule-form input[type=datetime-local] {
+    width: 210px;
     max-width: 100%;
     box-sizing: border-box;
-    padding: 0.35rem 0.5rem;
+    padding: 0.4rem 0.55rem;
     font: inherit;
     font-size: 0.85rem;
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
     background: var(--surface);
+}
+
+.btn-small {
+    padding: 0.4rem 0.85rem;
+    font-size: 0.85rem;
 }
