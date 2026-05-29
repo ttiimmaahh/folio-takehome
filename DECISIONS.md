@@ -82,12 +82,16 @@ Where an LLM genuinely *would* earn its place as this product grows — i.e. wha
 
 ## Progressive enhancement: the one place we use JavaScript
 
-The app is otherwise plain server-rendered PHP with no JS. The single exception is the
-copy-to-clipboard button on the generated share link — clipboard access has no CSS-only
-equivalent, and "copy" is the expected affordance for a long, opaque token URL. It's a tiny inline
-script that degrades gracefully: it uses the Clipboard API where available and falls back to
-`document.execCommand('copy')`, and the link is a real, selectable field either way, so nothing
-breaks without JS.
+The app is otherwise plain server-rendered PHP. JavaScript is used in exactly two places, both
+where the platform offers no CSS-only equivalent and both degrading gracefully:
+
+- **Copy-to-clipboard** on the generated share link — "copy" is the expected affordance for a long,
+  opaque token URL. Uses the Clipboard API with a `document.execCommand('copy')` fallback; the link
+  stays a real, selectable field without JS.
+- **Light/dark theme** — defaults to the OS `prefers-color-scheme` and can be toggled (persisted in
+  `localStorage`). A tiny `<head>` script resolves the theme before paint to avoid a flash; the
+  whole palette is CSS custom properties, so a single `[data-theme="dark"]` block covers it. Without
+  JS the app simply stays in the light default. Honors `prefers-reduced-motion`.
 
 ## Things in the existing code worth flagging
 
