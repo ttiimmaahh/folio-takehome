@@ -27,7 +27,7 @@ changes are audit-logged. The full reasoning and rejected alternatives are in
 
 ```bash
 docker compose up                          # http://localhost:8000 (re-seeds a fresh db.sqlite)
-docker compose exec app php tests/test.php # 16 tests, ≥1 per feature
+docker compose exec app php tests/test.php # 18 tests, ≥1 per feature
 docker compose exec app php migrate.php    # apply migrations standalone
 ```
 
