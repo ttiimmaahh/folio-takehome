@@ -37,9 +37,18 @@ it serves this branch on `:8000` and the original `main` branch (from a throwawa
 `:8001`:
 
 ```bash
-scripts/compare.sh up      # macOS / Linux   (Windows: scripts\compare.ps1 up)
-scripts/compare.sh down    # stop both and clean up
+scripts/compare.sh up        # macOS / Linux
+scripts/compare.sh down      # stop both and clean up
 ```
+
+On **Windows**, use the `.cmd` wrapper (no execution-policy fuss — it bypasses it for that one call):
+
+```bat
+scripts\compare.cmd up
+scripts\compare.cmd down
+```
+
+(If you prefer, the `.sh` also runs from **Git Bash**: `bash scripts/compare.sh up`.)
 
 **Time:** the full graded scope (three features + migrations + a test each + audit logging + agent
 setup) was committed within ~15 min of finishing planning; the rest is optional UX polish and a

@@ -9,8 +9,14 @@
   The baseline runs the ORIGINAL app from a throwaway git worktree of main, so you
   can compare it against the enhanced branch side-by-side.
 
-  Requires Docker Desktop to be running. If PowerShell blocks the script with
-  "running scripts is disabled on this system", run it like this instead:
+  Requires Docker Desktop to be running.
+
+  Easiest way to run this on Windows: use the wrapper, which handles the
+  execution policy for you and takes the same arguments —
+    scripts\compare.cmd up   |   enhanced   |   baseline   |   down
+
+  To run this .ps1 directly instead, if PowerShell blocks it with "running
+  scripts is disabled on this system":
     powershell -ExecutionPolicy Bypass -File scripts\compare.ps1 up
 #>
 param([string]$Command = "up")
