@@ -6,12 +6,12 @@ function render_header(string $title, ?array $staff = null): void {
 <html lang="en">
 <head>
     <script>
-    // Resolve theme before paint (saved preference, else system) to avoid a flash.
+    // Apply the theme before paint to avoid a flash. Default to light; dark is an
+    // explicit, persisted opt-in via the nav toggle.
     (function () {
         try {
             var saved = localStorage.getItem('folio-theme');
-            var systemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-            document.documentElement.setAttribute('data-theme', saved || (systemDark ? 'dark' : 'light'));
+            document.documentElement.setAttribute('data-theme', saved || 'light');
         } catch (e) {}
     })();
     </script>

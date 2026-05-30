@@ -140,10 +140,12 @@ clean CSS-only equivalent, and each degrades gracefully:
 - **Copy-to-clipboard** on the generated share link — "copy" is the expected affordance for a long,
   opaque token URL. Uses the Clipboard API with a `document.execCommand('copy')` fallback; the link
   stays a real, selectable field without JS.
-- **Light/dark theme** — defaults to the OS `prefers-color-scheme` and can be toggled (persisted in
-  `localStorage`). A tiny `<head>` script resolves the theme before paint to avoid a flash; the
-  whole palette is CSS custom properties, so a single `[data-theme="dark"]` block covers it. Without
-  JS the app simply stays in the light default. Honors `prefers-reduced-motion`.
+- **Light/dark theme** — defaults to **light**; dark is an explicit, persisted (`localStorage`)
+  opt-in via the nav toggle. A tiny `<head>` script applies the saved choice before paint (no flash);
+  the whole palette is CSS custom properties, so a single `[data-theme="dark"]` block covers it.
+  Without JS it stays light. Honors `prefers-reduced-motion`. (An earlier version auto-detected the
+  OS `prefers-color-scheme`; defaulting to light keeps parity with the original app and makes dark a
+  deliberate choice — and a cleaner before/after in the comparison.)
 - **Click-outside-to-close** for the schedule-picker dropdown — the picker itself is a native
   `<details>`; this one listener just dismisses it on an outside click. Without JS it still toggles
   from its own icon.
