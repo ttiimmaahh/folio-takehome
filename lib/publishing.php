@@ -58,3 +58,9 @@ function document_view_state(array $doc, ?string $now_utc = null): string {
     }
     return 'ok';
 }
+
+// Public documents are viewable at /d/{slug} with no token and no email gate.
+// Private documents require a credential (a token, or an email on the share list).
+function is_public_doc(array $doc): bool {
+    return (int) ($doc['is_public'] ?? 0) === 1;
+}

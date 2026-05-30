@@ -1,10 +1,11 @@
 <?php
 
 // Recipient-facing document access, reached via the pretty URL /d/{slug}
-// (routed by router.php). Two ways in:
+// (routed by router.php). Ways in, in order:
 //   1. /d/{slug}?token=…  — a direct per-recipient share link: straight in.
-//   2. /d/{slug}          — prove access by entering the email the doc was
-//                           shared with; we redirect to that share's token URL.
+//   2. /d/{slug} on a PUBLIC document — no credential needed.
+//   3. /d/{slug} on a private document — prove access by entering the email it
+//      was shared with; we redirect to that share's token URL.
 // A disabled or non-existent slug looks identical (obscure not-found), so a
 // guessed slug leaks nothing.
 
@@ -20,6 +21,33 @@ function document_unavailable(): void {
         <h1>Not available</h1>
         <p>This document could not be found, or is no longer available.</p>
     </div>
+    <?php
+    render_footer();
+    exit;
+}
+
+function show_not_yet(array $doc): void {
+    render_header($doc['title']);
+    ?>
+    <div class="centered-message">
+        <h1>Not yet available</h1>
+        <p>This document is scheduled to become available on
+            <strong><?= h(format_datetime($doc['publish_at'])) ?></strong>.</p>
+        <p>Please check back then.</p>
+    </div>
+    <?php
+    render_footer();
+    exit;
+}
+
+// Render the document. $sharedWith is the recipient's email for a private share,
+// or null for public access.
+function show_document(array $doc, ?string $sharedWith): void {
+    render_header($doc['title']);
+    ?>
+    <h1 class="page-title"><?= h($doc['title']) ?></h1>
+    <p class="meta"><?= $sharedWith !== null ? 'Shared with ' . h($sharedWith) : 'Public document' ?></p>
+    <pre class="doc-body"><?= h($doc['body']) ?></pre>
     <?php
     render_footer();
     exit;
@@ -45,32 +73,21 @@ if ($token !== '') {
     if (!$share) {
         document_unavailable();
     }
-
     if (document_view_state($doc) === 'not_yet') {
-        render_header($doc['title']);
-        ?>
-        <div class="centered-message">
-            <h1>Not yet available</h1>
-            <p>This document is scheduled to become available on
-                <strong><?= h(format_datetime($doc['publish_at'])) ?></strong>.</p>
-            <p>Please check back then.</p>
-        </div>
-        <?php
-        render_footer();
-        exit;
+        show_not_yet($doc);
     }
-
-    render_header($doc['title']);
-    ?>
-    <h1 class="page-title"><?= h($doc['title']) ?></h1>
-    <p class="meta">Shared with <?= h($share['recipient_email']) ?></p>
-    <pre class="doc-body"><?= h($doc['body']) ?></pre>
-    <?php
-    render_footer();
-    exit;
+    show_document($doc, $share['recipient_email']);
 }
 
-// --- Path 2: no token — prove access by email, then redirect to the token. --
+// --- Path 2: no token, but the document is public — anyone may view. --------
+if (is_public_doc($doc)) {
+    if (document_view_state($doc) === 'not_yet') {
+        show_not_yet($doc);
+    }
+    show_document($doc, null);
+}
+
+// --- Path 3: private, no token — prove access by email, then redirect. ------
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim((string) ($_POST['email'] ?? ''));

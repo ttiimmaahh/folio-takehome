@@ -104,6 +104,7 @@ $documents = [
         'created_at' => $daysAgo(75),
         'publish_at' => null,
         'status'     => 'live',
+        'is_public'  => true,
         'recipients' => ['requester@example.com'],
     ],
     [
@@ -113,6 +114,7 @@ $documents = [
         'created_at' => $daysAgo(30),
         'publish_at' => null,
         'status'     => 'live',
+        'is_public'  => true,
         'recipients' => ['council@cityofexample.gov'],
     ],
     [
@@ -145,8 +147,8 @@ $documents = [
 ];
 
 $insertDoc = $pdo->prepare('
-    INSERT INTO documents (title, body, created_by, created_at, publish_at, slug, status)
-    VALUES (?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO documents (title, body, created_by, created_at, publish_at, slug, status, is_public)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 ');
 $insertShare = $pdo->prepare('
     INSERT INTO shares (document_id, token, recipient_email)
@@ -160,6 +162,7 @@ foreach ($documents as $doc) {
     $insertDoc->execute([
         $doc['title'], $doc['body'], $doc['created_by'],
         $doc['created_at'], $doc['publish_at'], $slug, $doc['status'],
+        !empty($doc['is_public']) ? 1 : 0,
     ]);
     $docId = (int) $pdo->lastInsertId();
 

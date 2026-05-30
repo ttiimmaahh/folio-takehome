@@ -46,6 +46,12 @@ noted as future hardening.
   slug for no gain. "Paste into an email" flipped that — a link that's both readable *and* secure is
   exactly the ask — and the email gate adds a way in even without the token in hand.
 
+**Public documents** are a per-document opt-in, toggled on the share page and audit-logged: a public
+doc is viewable at `/d/{slug}` with no credential at all — for genuinely public records (the seed
+marks a records-request form and a council agenda public). Status and scheduling still gate it. So
+there are three access modes: public (no credential), a direct token link, or email-against-the-
+share-list.
+
 ## 3. Timezone: store UTC, display local
 
 A latent bug in the starting code: PHP defaults to `America/Chicago` (`bootstrap.php`) but SQLite's

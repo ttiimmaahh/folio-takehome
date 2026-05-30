@@ -77,6 +77,42 @@ function render_footer(): void {
         });
     });
 })();
+
+// Copy-to-clipboard for any .copy-widget (a readonly link + a copy button, and
+// optionally a "Copied!" status). Clipboard API with an execCommand fallback;
+// without JS the link is still a selectable field.
+(function () {
+    document.querySelectorAll('.copy-widget').forEach(function (w) {
+        var btn = w.querySelector('.copy-btn');
+        var input = w.querySelector('.copy-input');
+        var status = w.querySelector('.copy-status');
+        if (!btn || !input) { return; }
+        btn.addEventListener('click', function () {
+            var confirm = function () {
+                btn.classList.add('is-copied');
+                if (status) { status.textContent = 'Copied!'; status.classList.add('is-visible'); }
+                setTimeout(function () {
+                    btn.classList.remove('is-copied');
+                    if (status) {
+                        status.classList.remove('is-visible');
+                        setTimeout(function () { status.textContent = ''; }, 220);
+                    }
+                }, 1800);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(input.value).then(confirm, fallback);
+            } else {
+                fallback();
+            }
+            function fallback() {
+                input.focus();
+                input.select();
+                try { document.execCommand('copy'); } catch (e) {}
+                confirm();
+            }
+        });
+    });
+})();
 </script>
 </body>
 </html>

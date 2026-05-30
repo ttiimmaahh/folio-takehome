@@ -491,6 +491,19 @@ table.data td.id {
     border-color: var(--border-strong);
 }
 
+.pill-public {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--accent-soft);
+}
+
+/* Explanatory text inside a card (above a form). */
+.card-text {
+    margin: 0 0 1rem;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+}
+
 .status-form {
     display: inline-flex;
 }

@@ -155,6 +155,9 @@ render_header('Admin', $staff);
                             <?php else: ?>
                                 <span class="pill pill-live">Live</span>
                             <?php endif ?>
+                            <?php if ((int) ($d['is_public'] ?? 0) === 1): ?>
+                                <span class="pill pill-public">Public</span>
+                            <?php endif ?>
                         </div>
                         <div class="doc-meta">
                             <code class="doc-slug"><?= h($d['slug'] ?? '') ?></code>

@@ -125,6 +125,17 @@ test('a recipient email resolves to its share token, case-insensitively', functi
     assert_true($stmt->fetchColumn() !== false, 'email should resolve to a token regardless of case');
 });
 
+test('public documents need no credential; private ones do', function () {
+    assert_true(is_public_doc(['is_public' => 1]) === true, 'a public doc should not require a token/email');
+    assert_true(is_public_doc(['is_public' => 0]) === false, 'a private doc should require a credential');
+    assert_true(is_public_doc([]) === false, 'a missing flag defaults to private');
+});
+
+test('the seed includes at least one public document', function () {
+    $n = (int) db()->query('SELECT COUNT(*) FROM documents WHERE is_public = 1')->fetchColumn();
+    assert_true($n >= 1, 'expected the seed to mark some documents public');
+});
+
 // --- Human-readable IDs -----------------------------------------------------
 // Why it matters: slugs go in URLs and emails, so they must be clean and, above
 // all, unique -- a collision would point two documents at the same identifier.
