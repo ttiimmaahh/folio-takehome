@@ -68,6 +68,13 @@ Levenshtein) rather than exact. Implemented as an in-memory O(n) scan because th
 small; this is simpler and more capable than wiring an FTS/trigram extension into SQLite, and stays
 fully deterministic.
 
+Word closeness is measured **relative to the query length**, not the longer word. An early version
+divided edit distance by `max(len(query), len(word))`, which let a long title word look similar just
+because a handful of shared letters were a small fraction of it — searching `parking` surfaced
+`New Hire Onboarding Guide` (5 edits / 10 = 0.50, right on the threshold; they only share `-ing`).
+Dividing by the query length instead makes that 5/7 = 0.29 (dropped) while a real typo like
+`wlecome → welcome` stays 0.71. A regression test pins the case.
+
 - **Rejected — `LIKE '%q%'` only:** no typo tolerance.
 - **Rejected — SQLite FTS5 / trigram:** more moving parts than a small staff list warrants.
 - **Rejected — an LLM semantic ranker:** see §5.

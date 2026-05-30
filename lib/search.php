@@ -25,14 +25,18 @@ function title_match_score(string $q, string $title): float {
         return 0.9;
     }
 
+    // Typo tolerance: closeness of the query to its nearest title word, measured
+    // relative to the QUERY length. Using the query length (not the longer word)
+    // keeps a long title word from looking similar just because a few shared
+    // letters are a small fraction of it -- e.g. "parking" vs "onboarding" is
+    // 5 edits, which is 0.29 against the 7-char query, not 0.50 against the word.
+    $qlen = strlen($q);
     $best = 0.0;
     foreach (preg_split('/\s+/', $t) as $word) {
-        $maxLen = max(strlen($q), strlen($word));
-        if ($maxLen === 0) {
-            continue;
+        $sim = 1.0 - (levenshtein($q, $word) / $qlen);
+        if ($sim > $best) {
+            $best = $sim;
         }
-        $sim = 1.0 - (levenshtein($q, $word) / $maxLen);
-        $best = max($best, $sim);
     }
     return $best;
 }

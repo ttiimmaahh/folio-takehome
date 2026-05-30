@@ -203,5 +203,14 @@ test('search excludes unrelated titles', function () {
     assert_true(!in_array('Welcome Packet', $titles, true), 'unrelated query must not match');
 });
 
+test('search does not loosely match a longer, unrelated title', function () {
+    // Regression: "parking" surfaced "New Hire Onboarding Guide" because the old
+    // formula divided edit distance by the longer word ("onboarding"). Now it's
+    // measured against the query length, so the loose match drops out.
+    $titles = array_column(search_documents(db(), 'parking'), 'title');
+    assert_true(in_array('Parking Permit Application', $titles, true), 'the real match should still appear');
+    assert_true(!in_array('New Hire Onboarding Guide', $titles, true), 'a longer, loosely-similar title must not match');
+});
+
 echo "\n{$pass} passed, {$fail} failed.\n";
 exit($fail > 0 ? 1 : 0);
