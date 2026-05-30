@@ -166,8 +166,19 @@ render_header('Admin', $staff);
                         <?php if (!$live): ?>
                             <p class="doc-schedule-note">Goes live <?= h(format_datetime($d['publish_at'])) ?></p>
                         <?php endif ?>
+                    </div>
+                    <div class="doc-actions">
                         <details class="doc-schedule">
-                            <summary><?= $d['publish_at'] ? 'Reschedule' : 'Schedule publishing' ?></summary>
+                            <summary aria-label="Schedule publishing" title="Schedule publishing">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M16 14v2.2l1.6 1"></path>
+                                    <path d="M16 2v4"></path>
+                                    <path d="M21 7.5V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h3.5"></path>
+                                    <path d="M3 10h5"></path>
+                                    <path d="M8 2v4"></path>
+                                    <circle cx="16" cy="16" r="6"></circle>
+                                </svg>
+                            </summary>
                             <form method="post" class="schedule-form">
                                 <input type="hidden" name="action" value="schedule">
                                 <input type="hidden" name="doc_id" value="<?= (int) $d['id'] ?>">
@@ -175,8 +186,6 @@ render_header('Admin', $staff);
                                 <button type="submit" class="btn btn-small">Update</button>
                             </form>
                         </details>
-                    </div>
-                    <div class="doc-actions">
                         <?php $disabled = ($d['status'] ?? 'live') === 'disabled'; ?>
                         <form method="post" class="status-form">
                             <input type="hidden" name="action" value="set_status">

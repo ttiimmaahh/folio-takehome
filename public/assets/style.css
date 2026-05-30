@@ -530,37 +530,51 @@ table.data td.id {
     background: var(--accent-soft);
 }
 
+/* The reschedule control is an icon button (the <summary>); its form opens as a
+   dropdown anchored under it. Native <details> — no JS. */
 .doc-schedule {
-    margin-top: 0.55rem;
+    position: relative;
 }
 
 .doc-schedule > summary {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
+    justify-content: center;
     cursor: pointer;
     list-style: none;
-    color: var(--accent);
-    font-size: 0.8rem;
-    font-weight: 500;
-    user-select: none;
+    color: var(--text-muted);
+    padding: 0.4rem;
+    border-radius: var(--radius);
+    transition: background-color 0.15s, color 0.15s;
 }
 
 .doc-schedule > summary::-webkit-details-marker { display: none; }
+.doc-schedule > summary::marker { content: ""; }
 
-.doc-schedule > summary::before {
-    content: "▸";
-    font-size: 0.65rem;
+.doc-schedule > summary:hover {
+    color: var(--text);
+    background: var(--accent-soft);
 }
 
-.doc-schedule[open] > summary::before { content: "▾"; }
+.doc-schedule[open] > summary {
+    color: var(--accent);
+    background: var(--accent-soft);
+}
 
 .schedule-form {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    z-index: 10;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
-    margin-top: 0.55rem;
+    padding: 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
 }
 
 .schedule-form input[type=datetime-local] {
