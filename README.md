@@ -16,18 +16,28 @@ A small document-sharing app. You'll be extending it with features that customer
    prompt (see `DECISIONS.md` §2 for how this decision evolved).
 3. **Fuzzy search** — typo-tolerant search by title on the admin page.
 
-Plus **document takedown** (a reversible live/disabled toggle; disabled reads as an obscure
-not-found) and a pass of UX polish (list redesign, friendly dates, copy-to-clipboard, dark mode).
+Plus **public documents** (a per-document opt-in, viewable at `/d/{slug}` with no credential),
+**document takedown** (a reversible live/disabled toggle; disabled reads as an obscure not-found),
+and a pass of UX polish (list redesign, friendly dates, copy-to-clipboard, dark mode).
 
 Schema changes go through `migrations/*.sql` (a runner in `lib/migrate.php`); `schema.sql` is left
-frozen. Document creation, scheduling changes, share creation, and enable/disable are audit-logged.
-The full reasoning and rejected alternatives are in **[`DECISIONS.md`](DECISIONS.md)**; agent/workflow
-setup is in **[`CLAUDE.md`](CLAUDE.md)** and `.claude/`.
+frozen. Document creation, scheduling changes, share creation, enable/disable, and visibility
+changes are audit-logged. The full reasoning and rejected alternatives are in
+**[`DECISIONS.md`](DECISIONS.md)**; agent/workflow setup is in **[`CLAUDE.md`](CLAUDE.md)** and `.claude/`.
 
 ```bash
 docker compose up                          # http://localhost:8000 (re-seeds a fresh db.sqlite)
-docker compose exec app php tests/test.php # 14 tests, ≥1 per feature
+docker compose exec app php tests/test.php # 16 tests, ≥1 per feature
 docker compose exec app php migrate.php    # apply migrations standalone
+```
+
+**Compare against the original:** to see the before/after side-by-side, run the startup script —
+it serves this branch on `:8000` and the original `main` branch (from a throwaway git worktree) on
+`:8001`:
+
+```bash
+scripts/compare.sh up      # macOS / Linux   (Windows: scripts\compare.ps1 up)
+scripts/compare.sh down    # stop both and clean up
 ```
 
 **Time:** the full graded scope (three features + migrations + a test each + audit logging + agent

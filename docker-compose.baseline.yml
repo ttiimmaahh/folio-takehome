@@ -1,0 +1,12 @@
+# Runs the ORIGINAL (main-branch) app from a git worktree, on port 8001, so it
+# can sit side-by-side with the enhanced branch (port 8000) for comparison.
+# Driven by scripts/compare.{sh,ps1}, which create the worktree first.
+services:
+  app:
+    build: ./.worktrees/baseline
+    working_dir: /app
+    volumes:
+      - ./.worktrees/baseline:/app
+    ports:
+      - "8001:8000"
+    command: sh -c "php seed.php && php -S 0.0.0.0:8000 -t public/"

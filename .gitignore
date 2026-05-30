@@ -9,3 +9,6 @@ docs/
 
 # Planning artifacts (annotated with plannotator) — workflow, not deliverable
 plans/
+
+# Throwaway git worktree of main used by scripts/compare.* for side-by-side runs
+.worktrees/
