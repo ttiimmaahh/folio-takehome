@@ -6,6 +6,19 @@ function render_header(string $title, ?array $staff = null): void {
 <html lang="en">
 <head>
     <script>
+    // Tell the server our timezone so it renders/schedules in the viewer's own zone
+    // (validated in bootstrap.php; falls back to the org default). First visit: set
+    // the cookie and reload once so the very first render is already correct. The
+    // "did it stick" check prevents a reload loop when cookies are disabled.
+    (function () {
+        try {
+            var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (tz && document.cookie.indexOf('tz=') === -1) {
+                document.cookie = 'tz=' + encodeURIComponent(tz) + ';path=/;max-age=31536000;samesite=lax';
+                if (document.cookie.indexOf('tz=') !== -1) { location.reload(); }
+            }
+        } catch (e) {}
+    })();
     // Apply the theme before paint to avoid a flash. Default to light; dark is an
     // explicit, persisted opt-in via the nav toggle.
     (function () {

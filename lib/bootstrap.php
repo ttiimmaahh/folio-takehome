@@ -1,6 +1,14 @@
 <?php
 
+// America/Chicago is the org default / fallback. If the browser reported its own
+// timezone (the <head> script in lib/layout.php sets a `tz` cookie), honor it so
+// each viewer sees and schedules in their OWN zone — validated against the IANA
+// list before we trust it. Every datetime helper reads date_default_timezone_get(),
+// so this one override makes the whole app viewer-local.
 date_default_timezone_set('America/Chicago');
+if (isset($_COOKIE['tz']) && in_array($_COOKIE['tz'], timezone_identifiers_list(), true)) {
+    date_default_timezone_set($_COOKIE['tz']);
+}
 
 function db(): PDO {
     static $pdo = null;

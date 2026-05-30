@@ -52,14 +52,28 @@ marks a records-request form and a council agenda public). Status and scheduling
 there are three access modes: public (no credential), a direct token link, or email-against-the-
 share-list.
 
-## 3. Timezone: store UTC, display local
+## 3. Timezone: store UTC, display in the viewer's own zone
 
 A latent bug in the starting code: PHP defaults to `America/Chicago` (`bootstrap.php`) but SQLite's
-`datetime('now')` is UTC, so stored timestamps and displayed ones disagreed. Scheduled publishing
-would have been wrong by the offset. Fix: `publish_at` is always stored UTC and converted to the
-staff zone only for input/display (`lib/publishing.php`), and the availability gate compares UTC to
-UTC. This correctly handles DST — a 09:00 Chicago time in June stores as 14:00 UTC (CDT), in January
-as 06:00 UTC (CST).
+`datetime('now')` is UTC, so stored and displayed times disagreed — scheduled publishing would have
+been off by the offset. Fix: `publish_at` is always stored UTC, the availability gate compares
+UTC-to-UTC, and times convert to a display zone only for input/output (`lib/publishing.php`). DST is
+handled correctly (a 9:00 Central time stores as 14:00 UTC in summer / 15:00 in winter).
+
+That display zone was originally the baseline's fixed `America/Chicago`, for everyone. Fine for a
+single-region org — but a staff member elsewhere (e.g. EDT) would see Central times *and could
+schedule an hour off*, because the `datetime-local` input is the browser's wall-clock yet was read as
+Central. So it's now **viewer-local**: a tiny `<head>` script reports the browser's IANA zone in a
+`tz` cookie, and `bootstrap.php` overrides the default zone with it — validated against
+`timezone_identifiers_list()`, falling back to Central. Because every helper reads
+`date_default_timezone_get()`, that single override makes both **display and scheduling input**
+correct in each viewer's own zone. On the first visit the cookie is set and the page reloads once
+(loop-guarded) so even the first render is right.
+
+- **Rejected — leave it locked to Central:** correct only for Central users; surprising for everyone
+  else, and the input could be off by their offset.
+- **Future — per-tenant / per-user configured zones:** the multi-tenant-SaaS evolution; viewer-local
+  covers the common case without a settings table.
 
 ## 4. Search: typo-tolerant, in PHP
 

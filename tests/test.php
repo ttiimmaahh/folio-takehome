@@ -121,6 +121,19 @@ test('format_datetime renders a stored UTC time as a friendly local string', fun
     );
 });
 
+test('datetime rendering follows the active (viewer) timezone', function () {
+    // The cookie override in bootstrap just changes the active zone; every helper
+    // reads it, so the same UTC instant renders in each viewer's own zone.
+    $orig = date_default_timezone_get();
+    date_default_timezone_set('America/New_York');
+    $eastern = format_datetime('2026-06-01 14:00:00'); // 14:00 UTC
+    date_default_timezone_set('America/Chicago');
+    $central = format_datetime('2026-06-01 14:00:00');
+    date_default_timezone_set($orig);
+    assert_true(strpos($eastern, '10:00 AM EDT') !== false, 'eastern viewer should see EDT: ' . $eastern);
+    assert_true(strpos($central, '9:00 AM CDT') !== false, 'central viewer should see CDT: ' . $central);
+});
+
 test('local input round-trips through UTC storage', function () {
     // Guards the timezone trap: store UTC, display local, get the same wall time.
     $local = '2026-07-01 09:30:00';
