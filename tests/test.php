@@ -78,6 +78,11 @@ test('audit action labels are human-readable', function () {
     assert_true(audit_action_label('disable', 'document') === 'Disabled document', 'disable label');
     assert_true(audit_action_label('visibility', 'document') === 'Changed visibility', 'visibility label');
     assert_true(audit_action_label('frobnicate', 'widget') === 'Frobnicate widget', 'unknown pairs fall back readably');
+    // colour tones for scannability
+    assert_true(audit_action_tone('create') === 'positive', 'create -> positive');
+    assert_true(audit_action_tone('disable') === 'danger', 'disable -> danger');
+    assert_true(audit_action_tone('schedule') === 'warn', 'schedule -> warn');
+    assert_true(audit_action_tone('frobnicate') === 'neutral', 'unknown -> neutral');
 });
 
 test('the seed writes an audit trail the viewer can show', function () {

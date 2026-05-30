@@ -459,6 +459,18 @@ table.data td.id {
     color: var(--text-muted);
 }
 
+/* Colour-code the action so the list is scannable at a glance. */
+.audit-action {
+    font-weight: 600;
+    font-size: 0.98rem;
+    color: var(--text);
+}
+
+.audit-action.tone-positive { color: var(--success-text); }
+.audit-action.tone-danger   { color: var(--error-text); }
+.audit-action.tone-warn     { color: var(--warn-text); }
+.audit-action.tone-info     { color: var(--accent); }
+
 .card-count {
     font-weight: 400;
     font-size: 0.8rem;

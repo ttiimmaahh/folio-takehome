@@ -35,7 +35,7 @@ render_header('Audit log', $staff);
                 <li class="doc-item">
                     <div class="doc-main">
                         <div class="doc-headline">
-                            <span class="doc-title"><?= h(audit_action_label($e['action'], (string) $e['entity_type'])) ?></span>
+                            <span class="audit-action tone-<?= h(audit_action_tone($e['action'])) ?>"><?= h(audit_action_label($e['action'], (string) $e['entity_type'])) ?></span>
                             <?php if ($e['doc_title'] !== null): ?>
                                 <span class="audit-doc"><?= h($e['doc_title']) ?></span>
                             <?php elseif ($e['entity_type'] !== null): ?>

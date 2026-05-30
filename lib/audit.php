@@ -37,6 +37,25 @@ function audit_action_label(string $action, string $entityType): string {
     return $labels[$action . ':' . $entityType] ?? ucfirst($action) . ' ' . $entityType;
 }
 
+// A colour "tone" for an action, so the viewer can colour-code at a glance:
+// positive (created/enabled), danger (disabled), warn (rescheduled), info
+// (visibility), neutral (anything else).
+function audit_action_tone(string $action): string {
+    switch ($action) {
+        case 'create':
+        case 'enable':
+            return 'positive';
+        case 'disable':
+            return 'danger';
+        case 'schedule':
+            return 'warn';
+        case 'visibility':
+            return 'info';
+        default:
+            return 'neutral';
+    }
+}
+
 // Compact, human rendering of the JSON details blob, e.g. "publish_at: …" or a
 // recipient email. Skips empty values and any keys in $skip (the viewer skips
 // title/slug, which it shows separately as the document reference). Booleans
