@@ -446,6 +446,19 @@ table.data td.id {
     font-size: 0.8rem;
 }
 
+/* Audit log viewer */
+.audit-entity {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.card-count {
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
 .doc-schedule-note {
     margin: 0.3rem 0 0;
     font-size: 0.82rem;

@@ -145,6 +145,17 @@ worktree** (`.worktrees/baseline`, gitignored) and runs it as a second Docker Co
 included. Validated from a fresh clone: clone → checkout the branch → run the script → both apps up,
 18 tests green.
 
+## 9. Audit log viewer — surfacing the telemetry
+
+Every state change already calls `audit_log()`. A read-only viewer (`public/audit.php`, linked from
+admin) surfaces it newest-first: the actor, a human action label ("Created document", "Changed
+schedule", "Made public"…), the entity, and the decoded details. Logging you can't see is half a
+feature; for a records/civic tool an accountability trail is a real requirement, not decoration — and
+it's the observability story the JD asks for ("implement logging… diagnose using telemetry"). One
+wrinkle: the seed inserts rows with raw SQL, *bypassing* `audit_log()`, so it writes a matching trail
+itself — otherwise the viewer would open empty on a fresh boot. Read-only, one query, no new write
+paths; action labels and details formatting are small tested helpers in `lib/audit.php`.
+
 ## Progressive enhancement: JavaScript only where the platform needs it
 
 The app is server-rendered PHP. JavaScript appears only as progressive enhancement — each use has no

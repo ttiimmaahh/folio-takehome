@@ -86,7 +86,7 @@ render_header('Admin', $staff);
 ?>
 
 <h1 class="page-title">Admin</h1>
-<p class="page-subtitle">Create documents and generate share links for recipients.</p>
+<p class="page-subtitle">Create documents and generate share links for recipients. <a href="/audit.php" class="btn-link">View audit log →</a></p>
 
 <?php if (!empty($_GET['created'])): ?>
     <div class="banner banner-success">Document #<?= (int) $_GET['created'] ?> created.</div>

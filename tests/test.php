@@ -4,6 +4,7 @@ require __DIR__ . '/../lib/bootstrap.php';
 require __DIR__ . '/../lib/publishing.php';
 require __DIR__ . '/../lib/slug.php';
 require __DIR__ . '/../lib/search.php';
+require __DIR__ . '/../lib/audit.php';
 
 system('php ' . escapeshellarg(__DIR__ . '/../seed.php') . ' > /dev/null', $rc);
 if ($rc !== 0) {
@@ -70,6 +71,23 @@ test('audit_log records an action with its details', function () {
     $row = db()->query('SELECT action, entity_type, details FROM audit_log ORDER BY id DESC LIMIT 1')->fetch();
     assert_true($row['action'] === 'test_action' && $row['entity_type'] === 'document', 'action/entity recorded');
     assert_true(strpos((string) $row['details'], 'world') !== false, 'details JSON recorded');
+});
+
+test('audit action labels are human-readable', function () {
+    assert_true(audit_action_label('create', 'document') === 'Created document', 'create/document label');
+    assert_true(audit_action_label('disable', 'document') === 'Disabled document', 'disable label');
+    assert_true(audit_action_label('visibility', 'document') === 'Changed visibility', 'visibility label');
+    assert_true(audit_action_label('frobnicate', 'widget') === 'Frobnicate widget', 'unknown pairs fall back readably');
+});
+
+test('the seed writes an audit trail the viewer can show', function () {
+    $actions = db()->query('SELECT DISTINCT action FROM audit_log')->fetchAll(PDO::FETCH_COLUMN);
+    foreach (['create', 'schedule', 'visibility', 'disable'] as $a) {
+        assert_true(in_array($a, $actions, true), "seeded audit trail should include a '{$a}' action");
+    }
+    $events = recent_audit_events(db(), 5);
+    assert_true(count($events) >= 1, 'there should be recent events to show');
+    assert_true(array_key_exists('staff_name', $events[0]), 'events resolve the actor name');
 });
 
 // --- Scheduled publishing ---------------------------------------------------

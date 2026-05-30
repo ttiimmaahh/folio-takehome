@@ -154,6 +154,14 @@ $insertShare = $pdo->prepare('
     INSERT INTO shares (document_id, token, recipient_email)
     VALUES (?, ?, ?)
 ');
+// Seeding uses raw INSERTs, so it bypasses audit_log(). Write a matching audit
+// trail here so the viewer opens already populated. A management action is
+// recorded a little after the document was created, for a realistic timeline.
+$insertAudit = $pdo->prepare('
+    INSERT INTO audit_log (staff_id, action, entity_type, entity_id, details, created_at)
+    VALUES (?, ?, ?, ?, ?, ?)
+');
+$after = fn(string $ts, string $mod) => gmdate('Y-m-d H:i:s', strtotime("{$ts} {$mod}"));
 
 $welcomeSlug = null;
 $welcomeToken = null;
@@ -165,10 +173,31 @@ foreach ($documents as $doc) {
         !empty($doc['is_public']) ? 1 : 0,
     ]);
     $docId = (int) $pdo->lastInsertId();
+    $by = $doc['created_by'];
+
+    $insertAudit->execute([$by, 'create', 'document', $docId,
+        json_encode(['title' => $doc['title'], 'slug' => $slug, 'publish_at' => $doc['publish_at']]),
+        $doc['created_at']]);
+    if ($doc['publish_at'] !== null) {
+        $insertAudit->execute([$by, 'schedule', 'document', $docId,
+            json_encode(['publish_at' => $doc['publish_at']]), $after($doc['created_at'], '+2 hours')]);
+    }
+    if (!empty($doc['is_public'])) {
+        $insertAudit->execute([$by, 'visibility', 'document', $docId,
+            json_encode(['is_public' => true]), $after($doc['created_at'], '+1 day')]);
+    }
+    if ($doc['status'] === 'disabled') {
+        $insertAudit->execute([$by, 'disable', 'document', $docId,
+            json_encode(['status' => 'disabled']), $after($doc['created_at'], '+3 days')]);
+    }
 
     foreach ($doc['recipients'] as $email) {
         $token = random_token();
         $insertShare->execute([$docId, $token, $email]);
+        $shareId = (int) $pdo->lastInsertId();
+        $insertAudit->execute([$by, 'create', 'share', $shareId,
+            json_encode(['document_id' => $docId, 'recipient_email' => $email]), $doc['created_at']]);
+
         if ($doc['title'] === 'Welcome Packet' && $welcomeToken === null) {
             $welcomeSlug = $slug;
             $welcomeToken = $token;

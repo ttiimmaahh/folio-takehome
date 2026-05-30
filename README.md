@@ -18,16 +18,17 @@ A small document-sharing app. You'll be extending it with features that customer
 
 Plus **public documents** (a per-document opt-in, viewable at `/d/{slug}` with no credential),
 **document takedown** (a reversible live/disabled toggle; disabled reads as an obscure not-found),
-and a pass of UX polish (list redesign, friendly dates, copy-to-clipboard, dark mode).
+an **audit-log viewer** (`/audit.php`, linked from admin), and a pass of UX polish (list redesign,
+friendly dates, copy-to-clipboard, dark mode).
 
 Schema changes go through `migrations/*.sql` (a runner in `lib/migrate.php`); `schema.sql` is left
 frozen. Document creation, scheduling changes, share creation, enable/disable, and visibility
-changes are audit-logged. The full reasoning and rejected alternatives are in
-**[`DECISIONS.md`](DECISIONS.md)**; agent/workflow setup is in **[`CLAUDE.md`](CLAUDE.md)** and `.claude/`.
+changes are audit-logged (and viewable at `/audit.php`). The full reasoning and rejected alternatives
+are in **[`DECISIONS.md`](DECISIONS.md)**; agent/workflow setup is in **[`CLAUDE.md`](CLAUDE.md)** and `.claude/`.
 
 ```bash
 docker compose up                          # http://localhost:8000 (re-seeds a fresh db.sqlite)
-docker compose exec app php tests/test.php # 18 tests, ≥1 per feature
+docker compose exec app php tests/test.php # 22 tests, ≥1 per feature
 docker compose exec app php migrate.php    # apply migrations standalone
 ```
 
