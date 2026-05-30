@@ -65,6 +65,18 @@ function render_footer(): void {
         try { localStorage.setItem('folio-theme', next); } catch (e) {}
     });
 })();
+
+// Close any open schedule dropdown when clicking outside it (native <details>
+// only closes via its own summary). Without JS the picker still toggles fine.
+(function () {
+    document.addEventListener('click', function (e) {
+        document.querySelectorAll('details.doc-schedule[open]').forEach(function (d) {
+            if (!d.contains(e.target)) {
+                d.removeAttribute('open');
+            }
+        });
+    });
+})();
 </script>
 </body>
 </html>
