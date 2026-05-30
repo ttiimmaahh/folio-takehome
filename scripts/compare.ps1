@@ -45,6 +45,7 @@ switch ($Command) {
         docker @Baseline down
         git worktree remove --force $Worktree
         git worktree prune
+        if (Test-Path ".worktrees") { Remove-Item ".worktrees" -ErrorAction SilentlyContinue }
         Write-Host "Stopped both apps and removed the baseline worktree."
     }
     default { Write-Host "Usage: compare.ps1 [up|enhanced|baseline|down]" }

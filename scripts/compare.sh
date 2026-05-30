@@ -44,6 +44,7 @@ case "${1:-up}" in
         $BASELINE down 2>/dev/null || true
         git worktree remove --force "$WORKTREE" 2>/dev/null || true
         git worktree prune 2>/dev/null || true
+        rmdir .worktrees 2>/dev/null || true
         echo "Stopped both apps and removed the baseline worktree."
         ;;
     *)
