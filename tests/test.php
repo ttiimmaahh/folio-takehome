@@ -212,5 +212,13 @@ test('search does not loosely match a longer, unrelated title', function () {
     assert_true(!in_array('New Hire Onboarding Guide', $titles, true), 'a longer, loosely-similar title must not match');
 });
 
+test('search treats near-but-different words as non-matches', function () {
+    // "report" is 3 edits from "records" (the shared re_or_ skeleton) — a
+    // different word, not a typo — so it must not surface the Records documents.
+    $titles = array_column(search_documents(db(), 'report'), 'title');
+    assert_true(!in_array('Public Records Request Form', $titles, true), '"report" must not match "records"');
+    assert_true(!in_array('Records Retention Policy (2019)', $titles, true), '"report" must not match "records"');
+});
+
 echo "\n{$pass} passed, {$fail} failed.\n";
 exit($fail > 0 ? 1 : 0);

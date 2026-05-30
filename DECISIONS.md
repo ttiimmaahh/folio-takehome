@@ -73,7 +73,13 @@ divided edit distance by `max(len(query), len(word))`, which let a long title wo
 because a handful of shared letters were a small fraction of it — searching `parking` surfaced
 `New Hire Onboarding Guide` (5 edits / 10 = 0.50, right on the threshold; they only share `-ing`).
 Dividing by the query length instead makes that 5/7 = 0.29 (dropped) while a real typo like
-`wlecome → welcome` stays 0.71. A regression test pins the case.
+`wlecome → welcome` stays 0.71.
+
+The accept threshold is **0.6** — about a typo's worth of similarity. Below it the query is a
+*different* word, not a misspelling: `report` vs `records` is 3 edits = 0.50, so it no longer pulls
+in the Records documents, while `wlecome → welcome` (0.71) and plurals (`reports → report`, 0.86)
+stay. It's a deliberately simple, tunable knob; a real engine (FTS / trigram / semantic) is the
+longer-term answer for precision. Regression tests pin both the `parking` and `report` cases.
 
 - **Rejected — `LIKE '%q%'` only:** no typo tolerance.
 - **Rejected — SQLite FTS5 / trigram:** more moving parts than a small staff list warrants.

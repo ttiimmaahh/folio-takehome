@@ -8,7 +8,13 @@
 // ranking is simpler and more capable than wiring an FTS/trigram extension into
 // SQLite -- and it stays fully deterministic (no LLM needed for this).
 
-const SEARCH_MIN_SCORE = 0.5;
+// A fuzzy score below this means more than ~a typo's worth of the query had to
+// change to reach the word, i.e. it's a different word, not a misspelling. 0.6
+// keeps 1-2 character slips ("wlecome" -> "welcome" = 0.71) but drops vaguely
+// similar words ("report" vs "records" = 0.50). Substring/exact matches (>= 0.9)
+// are unaffected. Tune this knob; a real engine (FTS / trigram / semantic) is the
+// longer-term answer for precision.
+const SEARCH_MIN_SCORE = 0.6;
 
 // Score one title against a query in [0, 1]: exact > substring > closest-word
 // edit distance. Token-level Levenshtein means a typo in one word still matches.
