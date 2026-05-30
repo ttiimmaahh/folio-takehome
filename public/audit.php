@@ -31,12 +31,14 @@ render_header('Audit log', $staff);
     <?php else: ?>
         <ul class="doc-list">
             <?php foreach ($events as $e): ?>
-                <?php $summary = audit_details_summary($e['details']); ?>
+                <?php $summary = audit_details_summary($e['details'], ['title', 'slug', 'document_id']); ?>
                 <li class="doc-item">
                     <div class="doc-main">
                         <div class="doc-headline">
                             <span class="doc-title"><?= h(audit_action_label($e['action'], (string) $e['entity_type'])) ?></span>
-                            <?php if ($e['entity_type'] !== null): ?>
+                            <?php if ($e['doc_title'] !== null): ?>
+                                <span class="audit-doc"><?= h($e['doc_title']) ?></span>
+                            <?php elseif ($e['entity_type'] !== null): ?>
                                 <span class="audit-entity"><?= h($e['entity_type']) ?> #<?= (int) $e['entity_id'] ?></span>
                             <?php endif ?>
                         </div>
@@ -44,6 +46,14 @@ render_header('Audit log', $staff);
                             <span><?= h($e['staff_name'] ?? 'system') ?></span>
                             <span class="dot">·</span>
                             <span><?= h(format_datetime($e['created_at'])) ?></span>
+                            <?php if ($e['doc_slug'] !== null): ?>
+                                <span class="dot">·</span>
+                                <code class="doc-slug"><?= h($e['doc_slug']) ?></code>
+                            <?php endif ?>
+                            <?php if ($e['entity_type'] === 'share'): ?>
+                                <span class="dot">·</span>
+                                <span class="audit-entity">share #<?= (int) $e['entity_id'] ?></span>
+                            <?php endif ?>
                             <?php if ($summary !== ''): ?>
                                 <span class="dot">·</span>
                                 <span><?= h($summary) ?></span>

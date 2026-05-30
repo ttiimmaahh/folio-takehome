@@ -163,7 +163,10 @@ included. Validated from a fresh clone: clone → checkout the branch → run th
 
 Every state change already calls `audit_log()`. A read-only viewer (`public/audit.php`, linked from
 admin) surfaces it newest-first: the actor, a human action label ("Created document", "Changed
-schedule", "Made public"…), the entity, and the decoded details. Logging you can't see is half a
+schedule", "Made public"…), the **affected document's name and slug** (resolved at display time by
+joining back to `documents` — directly for document events, via `shares` for share events, so a row
+reads "Changed schedule · Q3 Board Meeting Minutes" rather than "document #5"), and the decoded
+details. Logging you can't see is half a
 feature; for a records/civic tool an accountability trail is a real requirement, not decoration — and
 it's the observability story the JD asks for ("implement logging… diagnose using telemetry"). One
 wrinkle: the seed inserts rows with raw SQL, *bypassing* `audit_log()`, so it writes a matching trail

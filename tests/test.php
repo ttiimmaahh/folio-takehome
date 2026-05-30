@@ -90,6 +90,20 @@ test('the seed writes an audit trail the viewer can show', function () {
     assert_true(array_key_exists('staff_name', $events[0]), 'events resolve the actor name');
 });
 
+test('audit events resolve the affected document name and slug', function () {
+    $events = recent_audit_events(db(), 100);
+    $docEvent = null;
+    $shareEvent = null;
+    foreach ($events as $e) {
+        if ($e['entity_type'] === 'document' && $docEvent === null) { $docEvent = $e; }
+        if ($e['entity_type'] === 'share' && $shareEvent === null) { $shareEvent = $e; }
+    }
+    assert_true($docEvent !== null && $docEvent['doc_title'] !== null && $docEvent['doc_slug'] !== null,
+        'a document event should resolve its title and slug');
+    assert_true($shareEvent !== null && $shareEvent['doc_title'] !== null,
+        'a share event should resolve its document title via the join');
+});
+
 // --- Scheduled publishing ---------------------------------------------------
 // Why it matters: recipients must not see a document before its publish time.
 // The gate is a pure function so we can assert the boundary without a clock.

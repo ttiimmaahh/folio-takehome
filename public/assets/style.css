@@ -453,6 +453,12 @@ table.data td.id {
     color: var(--text-muted);
 }
 
+.audit-doc {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-muted);
+}
+
 .card-count {
     font-weight: 400;
     font-size: 0.8rem;
