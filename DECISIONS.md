@@ -121,6 +121,17 @@ in one tested decision, `document_view_state()`.
 - **Rejected — hard delete:** irreversible, loses history, and trips foreign keys against existing
   shares. Disable is reversible and auditable.
 
+## 8. Comparing against the original: a git-worktree harness
+
+To make the before/after obvious — and easy for a reviewer — `scripts/compare.{sh,ps1}` run both
+versions at once: this branch on `:8000` and the original `main` on `:8001`. The wrinkle is that two
+branches can't share one working tree, so the script checks `origin/main` out into a throwaway **git
+worktree** (`.worktrees/baseline`, gitignored) and runs it as a second Docker Compose project
+(`docker-compose.baseline.yml`, mapped to `:8001`). No second clone, no port collision — one command
+(`compare.sh up`) brings up a true side-by-side, and `compare.sh down` tears it all down, worktree
+included. Validated from a fresh clone: clone → checkout the branch → run the script → both apps up,
+18 tests green.
+
 ## Progressive enhancement: JavaScript only where the platform needs it
 
 The app is server-rendered PHP. JavaScript appears only as progressive enhancement — each use has no
@@ -155,21 +166,23 @@ document count is large enough to outgrow the O(n) scan.
 
 ## Time spent
 
-The brief budgets ~3 hours. The commit timestamps (`git log --date=format:'%H:%M' main..HEAD`) tell
-the real story, on 2026-05-29:
+The brief budgets ~3 hours. The commit timestamps (`git log --date=format:'%m-%d %H:%M' main..HEAD`)
+tell the real story:
 
 - Planning and context-gathering came first (reading the code, a written plan, a few clarifying
-  questions about the open calls). First commit landed at **16:36**.
+  questions about the open calls). First commit landed at **05-29 16:36**.
 - **All three features** were committed by **16:43**, and the **full graded deliverable** — migration
   system, a test per feature, audit logging, and the agent setup + decision docs — by **16:47**.
   That's roughly **~10–15 minutes of implementation** after planning.
-- Everything after that is iterative refinement and review-driven follow-ups: UX polish through
-  ~17:47 (documents-list redesign, friendly datetimes, copy-to-clipboard, light/dark theme), then a
-  review pass that added two more features — realizing the readable ID as a real `/d/{slug}` URL
-  with email-based access, and document takedown — committed by **18:14**.
+- The rest is iterative refinement and review-driven follow-ups across two short sessions (an
+  overnight break between): on 05-29 to ~18:17, the UX polish (list redesign, friendly datetimes,
+  copy-to-clipboard, dark mode) plus the readable-`/d/{slug}`-URL realization and document takedown;
+  then a brief 05-30 session (~11:42–12:06) adding the calendar-icon scheduling UX, **public
+  documents**, the side-by-side **comparison scripts**, and direct tests for the migration runner and
+  audit log.
 
-Total wall-clock was about **1.5 hours** against the 3-hour budget, and the clear majority was
-optional polish and review-driven follow-ups, not the required scope (done in the first ~11 minutes
-of implementation). That speed is the point of the exercise for an AI-product role: the agentic
-workflow (plan → implement → render/screenshot → verify → commit) let the required scope land fast
-and left room to iterate on both experience and judgment.
+Total active wall-clock was roughly **~2 hours** (excluding the break) against the 3-hour budget —
+and the clear majority was optional polish and review-driven follow-ups, not the required scope (done
+in the first ~11 minutes of implementation). That speed is the point of the exercise for an AI-product
+role: the agentic workflow (plan → implement → render/screenshot → verify → commit) let the required
+scope land fast and left room to iterate on both experience and judgment.
